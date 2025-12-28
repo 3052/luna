@@ -2,105 +2,62 @@ package hls
 
 import (
    "fmt"
-   "math"
    "net/url"
    "sort"
    "strconv"
    "strings"
 )
 
-// VariantInfo holds the metadata from a single #EXT-X-STREAM-INF tag.
-// It describes one possible way to play the content from its parent Stream's URI.
-type VariantInfo struct {
+// Stream represents a single media playlist (URI). It aggregates information
+// from all #EXT-X-STREAM-INF tags that point to the same URI. The primary
+// attributes are taken from the variant with the lowest bandwidth.
+type Stream struct {
+   URI              *url.URL
+   ID               int
    Bandwidth        int
    AverageBandwidth int
    Codecs           string
    Resolution       string
    FrameRate        string
-   Audio            string // Refers to a Rendition GROUP-ID for audio
-   Subtitles        string // Refers to a Rendition GROUP-ID for subtitles
+   Subtitles        string   // Refers to a Rendition GROUP-ID for subtitles
+   Audio            []string // A list of associated audio Rendition GROUP-IDs
 }
 
-// String returns a multi-line summary of the VariantInfo with no indentation.
-func (vi *VariantInfo) String() string {
+// String returns a multi-line summary of the Stream.
+func (s *Stream) String() string {
    var builder strings.Builder
 
-   // Prioritize printing average bandwidth if it exists.
-   if vi.AverageBandwidth > 0 {
+   if s.AverageBandwidth > 0 {
       builder.WriteString("average_bandwidth = ")
-      builder.WriteString(strconv.Itoa(vi.AverageBandwidth))
+      builder.WriteString(strconv.Itoa(s.AverageBandwidth))
       builder.WriteString("\n")
    }
 
    builder.WriteString("bandwidth = ")
-   builder.WriteString(strconv.Itoa(vi.Bandwidth))
+   builder.WriteString(strconv.Itoa(s.Bandwidth))
 
-   // Include resolution if it was specified in the manifest.
-   if vi.Resolution != "" {
+   if s.Resolution != "" {
       builder.WriteString("\nresolution = ")
-      builder.WriteString(vi.Resolution)
+      builder.WriteString(s.Resolution)
    }
 
-   if vi.Codecs != "" {
-      // The CODECS string can contain multiple codecs (e.g., "avc1.640028,mp4a.40.2").
-      // We display only the first one, which is conventionally the video codec.
-      videoCodec, _, _ := strings.Cut(vi.Codecs, ",")
+   if s.Codecs != "" {
+      // CORRECTED: The field is s.Codecs, not s.Codeacs
+      videoCodec, _, _ := strings.Cut(s.Codecs, ",")
       builder.WriteString("\ncodecs = ")
       builder.WriteString(videoCodec)
    }
+
+   builder.WriteString(fmt.Sprintf("\nid = %d", s.ID))
    return builder.String()
 }
 
-// Stream represents a single media playlist (URI) and all the different
-// variant renditions (#EXT-X-STREAM-INF tags) that point to it.
-type Stream struct {
-   URI      *url.URL
-   Variants []*VariantInfo
-   ID       int // Unique ID within the manifest
-}
-
-// String returns a multi-line summary of the Stream, showing only the first
-// variant and printing the stream ID last.
-func (s *Stream) String() string {
-   // By construction, a stream will have at least one variant.
-   // For summary purposes, we display only the first one found.
-   firstVariant := s.Variants[0]
-
-   var builder strings.Builder
-   builder.WriteString(firstVariant.String())
-   builder.WriteString(fmt.Sprintf("\nid = %d", s.ID)) // ID is now the last line
-
-   return builder.String()
-}
-
-// SortBandwidth determines the best bandwidth value to use for sorting.
-// It returns the minimum AVERAGE-BANDWIDTH if available, otherwise it
-// falls back to the minimum BANDWIDTH.
+// SortBandwidth determines the value to use for sorting, prioritizing average bandwidth.
 func (s *Stream) SortBandwidth() int {
-   if len(s.Variants) == 0 {
-      return 0
+   if s.AverageBandwidth > 0 {
+      return s.AverageBandwidth
    }
-
-   minAvgBw := math.MaxInt
-   minBw := math.MaxInt
-   hasAvgBw := false
-
-   for _, v := range s.Variants {
-      if v.AverageBandwidth > 0 {
-         hasAvgBw = true
-         if v.AverageBandwidth < minAvgBw {
-            minAvgBw = v.AverageBandwidth
-         }
-      }
-      if v.Bandwidth < minBw {
-         minBw = v.Bandwidth
-      }
-   }
-
-   if hasAvgBw {
-      return minAvgBw
-   }
-   return minBw
+   return s.Bandwidth
 }
 
 type MasterPlaylist struct {
@@ -191,65 +148,52 @@ func parseMaster(lines []string) (*MasterPlaylist, error) {
       } else if strings.HasPrefix(line, "#EXT-X-SESSION-KEY:") {
          masterPlaylist.SessionKeys = append(masterPlaylist.SessionKeys, parseKey(line))
       } else if strings.HasPrefix(line, "#EXT-X-STREAM-INF:") {
-         variantInfo, err := parseVariantInfo(line)
-         if err != nil {
-            return nil, err
-         }
+         attrs := parseAttributes(line, "#EXT-X-STREAM-INF:")
 
-         // The URI MUST be on the next line
-         if i+1 >= len(lines) {
-            continue // Malformed, missing URI
+         if i+1 >= len(lines) { // Malformed, missing URI
+            continue
          }
          i++
          uriLine := lines[i]
 
-         // Check if we've already seen this URI
-         if stream, ok := streamMap[uriLine]; ok {
-            // URI exists, append this new variant info to the existing stream
-            stream.Variants = append(stream.Variants, variantInfo)
-         } else {
+         stream, exists := streamMap[uriLine]
+         if !exists {
             // First time seeing this URI, create a new Stream
-            newStream := &Stream{ID: streamCounter}
+            stream = &Stream{ID: streamCounter}
             streamCounter++
             if parsedURL, err := url.Parse(uriLine); err == nil {
-               newStream.URI = parsedURL
+               stream.URI = parsedURL
             }
-            newStream.Variants = append(newStream.Variants, variantInfo)
-            streamMap[uriLine] = newStream
-            masterPlaylist.Streams = append(masterPlaylist.Streams, newStream)
+            streamMap[uriLine] = stream
+            masterPlaylist.Streams = append(masterPlaylist.Streams, stream)
+
+            // This is the first so it's automatically the lowest bandwidth; populate all fields
+            populateStreamAttributes(stream, attrs)
+         }
+
+         // Always add the AUDIO group from the current tag to the list.
+         if audioGroup := attrs["AUDIO"]; audioGroup != "" {
+            stream.Audio = append(stream.Audio, audioGroup)
+         }
+
+         // Check if this variant has a lower bandwidth than the one stored.
+         // If so, update the stream's primary attributes.
+         if bw, _ := strconv.Atoi(attrs["BANDWIDTH"]); exists && bw < stream.Bandwidth {
+            populateStreamAttributes(stream, attrs)
          }
       }
    }
    return masterPlaylist, nil
 }
 
-func parseVariantInfo(line string) (*VariantInfo, error) {
-   attrs := parseAttributes(line, "#EXT-X-STREAM-INF:")
-   bwStr := attrs["BANDWIDTH"]
-   if bwStr == "" {
-      return nil, fmt.Errorf("missing required attribute BANDWIDTH")
-   }
-   bandwidth, err := strconv.Atoi(bwStr)
-   if err != nil {
-      return nil, fmt.Errorf("invalid BANDWIDTH %q: %w", bwStr, err)
-   }
-   var averageBandwidth int
-   if avgStr := attrs["AVERAGE-BANDWIDTH"]; avgStr != "" {
-      average, err := strconv.Atoi(avgStr)
-      if err != nil {
-         return nil, fmt.Errorf("invalid AVERAGE-BANDWIDTH %q: %w", avgStr, err)
-      }
-      averageBandwidth = average
-   }
-   return &VariantInfo{
-      Bandwidth:        bandwidth,
-      AverageBandwidth: averageBandwidth,
-      Codecs:           attrs["CODECS"],
-      Resolution:       attrs["RESOLUTION"],
-      FrameRate:        attrs["FRAME-RATE"],
-      Audio:            attrs["AUDIO"],
-      Subtitles:        attrs["SUBTITLES"],
-   }, nil
+// populateStreamAttributes updates a Stream's fields from a map of attributes.
+func populateStreamAttributes(stream *Stream, attrs map[string]string) {
+   stream.Codecs = attrs["CODECS"]
+   stream.Resolution = attrs["RESOLUTION"]
+   stream.FrameRate = attrs["FRAME-RATE"]
+   stream.Subtitles = attrs["SUBTITLES"]
+   stream.Bandwidth, _ = strconv.Atoi(attrs["BANDWIDTH"])
+   stream.AverageBandwidth, _ = strconv.Atoi(attrs["AVERAGE-BANDWIDTH"])
 }
 
 func parseRendition(line string) *Rendition {
