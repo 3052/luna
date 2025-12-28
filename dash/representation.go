@@ -2,6 +2,7 @@ package dash
 
 import (
    "net/url"
+   "slices"
    "strconv"
    "strings"
 )
@@ -175,4 +176,13 @@ func (r *Representation) link() {
       r.SegmentList.Parent = r
       r.SegmentList.link()
    }
+}
+
+// SortByBandwidth sorts a slice of Representations in-place by their Bandwidth
+// in ascending order (lowest to highest).
+// This function requires Go 1.21+.
+func SortByBandwidth(reps []*Representation) {
+   slices.SortFunc(reps, func(a, b *Representation) int {
+      return a.Bandwidth - b.Bandwidth
+   })
 }
