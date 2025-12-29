@@ -28,23 +28,19 @@ func (k *Key) DecodeData() ([]byte, error) {
    if k.URI == nil {
       return nil, errors.New("URI is nil")
    }
-
    if k.URI.Scheme != "data" {
       return nil, errors.New("URI is not a data URI")
    }
-
    // For data URIs, net/url stores the content (mime+encoding+data) in Opaque.
    // Format: [<mediatype>][;base64],<data>
    meta, dataString, found := strings.Cut(k.URI.Opaque, ",")
    if !found {
       return nil, errors.New("invalid data URI: missing comma separator")
    }
-
    // Verify base64 encoding is specified in the metadata (before the comma)
    if !strings.Contains(meta, ";base64") {
       return nil, errors.New("data URI does not contain base64 indicator")
    }
-
    return base64.StdEncoding.DecodeString(dataString)
 }
 
@@ -64,7 +60,6 @@ func parseKey(line string) *Key {
       prefix = "#EXT-X-SESSION-KEY:"
    }
    attrs := parseAttributes(line, prefix)
-
    newKey := &Key{
       Method:            attrs["METHOD"],
       KeyFormat:         attrs["KEYFORMAT"],
@@ -72,7 +67,6 @@ func parseKey(line string) *Key {
       IV:                attrs["IV"],
       Characteristics:   attrs["CHARACTERISTICS"],
    }
-
    if value, ok := attrs["URI"]; ok && value != "" {
       if parsedURL, err := url.Parse(value); err == nil {
          newKey.URI = parsedURL

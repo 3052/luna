@@ -58,14 +58,12 @@ func TestDecodeMaster(t *testing.T) {
    if err != nil {
       t.Fatalf("DecodeMaster failed: %v", err)
    }
-
    // The sample manifest has 8 unique video stream URIs.
    if len(master.Streams) != 8 {
       t.Errorf("Expected 8 unique streams, got %d", len(master.Streams))
    }
-
    // Find a specific stream to verify grouping of audio tracks.
-   var foundStream *Stream
+   var foundStream *ExtStream
    for _, stream := range master.Streams {
       if strings.Contains(stream.URI.Path, "8500_complete") {
          foundStream = stream

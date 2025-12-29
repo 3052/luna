@@ -8,10 +8,10 @@ import (
    "strings"
 )
 
-// Stream represents a single media playlist (URI). It aggregates information
+// ExtStream represents a single media playlist (URI). It aggregates information
 // from all #EXT-X-STREAM-INF tags that point to the same URI. The primary
 // attributes are taken from the variant with the lowest bandwidth.
-type Stream struct {
+type ExtStream struct {
    URI              *url.URL
    ID               int
    Bandwidth        int
@@ -19,12 +19,12 @@ type Stream struct {
    Codecs           string
    Resolution       string
    FrameRate        string
-   Subtitles        string   // Refers to a Rendition GROUP-ID for subtitles
-   Audio            []string // A list of associated audio Rendition GROUP-IDs
+   Subtitles        string   // Refers to a ExtMedia GROUP-ID for subtitles
+   Audio            []string // A list of associated audio ExtMedia GROUP-IDs
 }
 
-// String returns a multi-line summary of the Stream.
-func (s *Stream) String() string {
+// String returns a multi-line summary of the ExtStream.
+func (s *ExtStream) String() string {
    var builder strings.Builder
 
    if s.AverageBandwidth > 0 {
@@ -42,7 +42,6 @@ func (s *Stream) String() string {
    }
 
    if s.Codecs != "" {
-      // CORRECTED: The field is s.Codecs, not s.Codeacs
       videoCodec, _, _ := strings.Cut(s.Codecs, ",")
       builder.WriteString("\ncodecs = ")
       builder.WriteString(videoCodec)
@@ -53,7 +52,7 @@ func (s *Stream) String() string {
 }
 
 // SortBandwidth determines the value to use for sorting, prioritizing average bandwidth.
-func (s *Stream) SortBandwidth() int {
+func (s *ExtStream) SortBandwidth() int {
    if s.AverageBandwidth > 0 {
       return s.AverageBandwidth
    }
@@ -61,8 +60,8 @@ func (s *Stream) SortBandwidth() int {
 }
 
 type MasterPlaylist struct {
-   Streams     []*Stream
-   Medias      []*Rendition
+   Streams     []*ExtStream
+   Medias      []*ExtMedia
    SessionKeys []*Key
 }
 
@@ -86,7 +85,7 @@ func (mp *MasterPlaylist) ResolveURIs(base *url.URL) {
 // Sort sorts the Streams and Medias slices in place.
 // Streams are sorted by their minimum average bandwidth (if available),
 // otherwise falling back to minimum bandwidth.
-// Renditions (Medias) are sorted by GroupID.
+// ExtMedias (Medias) are sorted by GroupID.
 func (mp *MasterPlaylist) Sort() {
    sort.Slice(mp.Streams, func(i, j int) bool {
       return mp.Streams[i].SortBandwidth() < mp.Streams[j].SortBandwidth()
@@ -96,8 +95,8 @@ func (mp *MasterPlaylist) Sort() {
    })
 }
 
-// Rendition represents an #EXT-X-MEDIA tag.
-type Rendition struct {
+// ExtMedia represents an #EXT-X-MEDIA tag.
+type ExtMedia struct {
    Type            string
    GroupID         string
    Name            string
@@ -111,8 +110,8 @@ type Rendition struct {
    ID              int
 }
 
-// String returns a multi-line summary of the Rendition.
-func (r *Rendition) String() string {
+// String returns a multi-line summary of the ExtMedia.
+func (r *ExtMedia) String() string {
    var builder strings.Builder
    builder.WriteString("type = ")
    builder.WriteString(r.Type)
@@ -136,7 +135,7 @@ func (r *Rendition) String() string {
 func parseMaster(lines []string) (*MasterPlaylist, error) {
    masterPlaylist := &MasterPlaylist{}
    streamCounter := 0
-   streamMap := make(map[string]*Stream) // Map URL to Stream to handle grouping
+   streamMap := make(map[string]*ExtStream) // Map URL to ExtStream to handle grouping
 
    for i := 0; i < len(lines); i++ {
       line := lines[i]
@@ -158,8 +157,8 @@ func parseMaster(lines []string) (*MasterPlaylist, error) {
 
          stream, exists := streamMap[uriLine]
          if !exists {
-            // First time seeing this URI, create a new Stream
-            stream = &Stream{ID: streamCounter}
+            // First time seeing this URI, create a new ExtStream
+            stream = &ExtStream{ID: streamCounter}
             streamCounter++
             if parsedURL, err := url.Parse(uriLine); err == nil {
                stream.URI = parsedURL
@@ -186,8 +185,8 @@ func parseMaster(lines []string) (*MasterPlaylist, error) {
    return masterPlaylist, nil
 }
 
-// populateStreamAttributes updates a Stream's fields from a map of attributes.
-func populateStreamAttributes(stream *Stream, attrs map[string]string) {
+// populateStreamAttributes updates a ExtStream's fields from a map of attributes.
+func populateStreamAttributes(stream *ExtStream, attrs map[string]string) {
    stream.Codecs = attrs["CODECS"]
    stream.Resolution = attrs["RESOLUTION"]
    stream.FrameRate = attrs["FRAME-RATE"]
@@ -196,9 +195,9 @@ func populateStreamAttributes(stream *Stream, attrs map[string]string) {
    stream.AverageBandwidth, _ = strconv.Atoi(attrs["AVERAGE-BANDWIDTH"])
 }
 
-func parseRendition(line string) *Rendition {
+func parseRendition(line string) *ExtMedia {
    attrs := parseAttributes(line, "#EXT-X-MEDIA:")
-   newRendition := &Rendition{
+   newRendition := &ExtMedia{
       Type:            attrs["TYPE"],
       GroupID:         attrs["GROUP-ID"],
       Name:            attrs["NAME"],
