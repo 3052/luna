@@ -7,8 +7,8 @@ import (
    "strings"
 )
 
-// Key represents encryption info (#EXT-X-KEY or #EXT-X-SESSION-KEY)
-type Key struct {
+// SessionKey represents encryption info (#EXT-X-KEY or #EXT-X-SESSION-KEY)
+type SessionKey struct {
    Method            string
    URI               *url.URL
    KeyFormat         string
@@ -17,14 +17,14 @@ type Key struct {
    Characteristics   string // For session keys
 }
 
-func (k *Key) resolve(base *url.URL) {
+func (k *SessionKey) resolve(base *url.URL) {
    if k.URI != nil {
       k.URI = base.ResolveReference(k.URI)
    }
 }
 
 // DecodeData extracts and decodes the Base64 data directly from the URL Opaque field.
-func (k *Key) DecodeData() ([]byte, error) {
+func (k *SessionKey) DecodeData() ([]byte, error) {
    if k.URI == nil {
       return nil, errors.New("URI is nil")
    }
@@ -44,23 +44,13 @@ func (k *Key) DecodeData() ([]byte, error) {
    return base64.StdEncoding.DecodeString(dataString)
 }
 
-// DateRange represents metadata time spans (#EXT-X-DATERANGE)
-type DateRange struct {
-   ID        string
-   Class     string
-   StartDate string
-   EndDate   string
-   Cue       string
-   AssetList string
-}
-
-func parseKey(line string) *Key {
+func parseKey(line string) *SessionKey {
    prefix := "#EXT-X-KEY:"
    if strings.HasPrefix(line, "#EXT-X-SESSION-KEY:") {
       prefix = "#EXT-X-SESSION-KEY:"
    }
    attrs := parseAttributes(line, prefix)
-   newKey := &Key{
+   newKey := &SessionKey{
       Method:            attrs["METHOD"],
       KeyFormat:         attrs["KEYFORMAT"],
       KeyFormatVersions: attrs["KEYFORMATVERSIONS"],
@@ -73,16 +63,4 @@ func parseKey(line string) *Key {
       }
    }
    return newKey
-}
-
-func parseDateRange(line string) *DateRange {
-   attrs := parseAttributes(line, "#EXT-X-DATERANGE:")
-   return &DateRange{
-      ID:        attrs["ID"],
-      Class:     attrs["CLASS"],
-      StartDate: attrs["START-DATE"],
-      EndDate:   attrs["END-DATE"],
-      Cue:       attrs["CUE"],
-      AssetList: attrs["X-ASSET-LIST"],
-   }
 }
