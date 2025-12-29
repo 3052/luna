@@ -8,10 +8,10 @@ import (
    "strings"
 )
 
-// ExtStream represents a single media playlist (URI). It aggregates information
-// from all #EXT-X-STREAM-INF tags that point to the same URI. The primary
+// StreamInf represents a single media playlist (URI) from a #EXT-X-STREAM-INF tag.
+// It aggregates information from all tags that point to the same URI. The primary
 // attributes are taken from the variant with the lowest bandwidth.
-type ExtStream struct {
+type StreamInf struct {
    URI              *url.URL
    ID               int
    Bandwidth        int
@@ -19,12 +19,12 @@ type ExtStream struct {
    Codecs           string
    Resolution       string
    FrameRate        string
-   Subtitles        string   // Refers to a ExtMedia GROUP-ID for subtitles
-   Audio            []string // A list of associated audio ExtMedia GROUP-IDs
+   Subtitles        string   // Refers to a Media GROUP-ID for subtitles
+   Audio            []string // A list of associated audio Media GROUP-IDs
 }
 
-// String returns a multi-line summary of the ExtStream.
-func (s *ExtStream) String() string {
+// String returns a multi-line summary of the StreamInf.
+func (s *StreamInf) String() string {
    var builder strings.Builder
 
    if s.AverageBandwidth > 0 {
@@ -52,7 +52,7 @@ func (s *ExtStream) String() string {
 }
 
 // SortBandwidth determines the value to use for sorting, prioritizing average bandwidth.
-func (s *ExtStream) SortBandwidth() int {
+func (s *StreamInf) SortBandwidth() int {
    if s.AverageBandwidth > 0 {
       return s.AverageBandwidth
    }
@@ -60,43 +60,39 @@ func (s *ExtStream) SortBandwidth() int {
 }
 
 type MasterPlaylist struct {
-   Streams     []*ExtStream
-   Medias      []*ExtMedia
-   SessionKeys []*Key
+   StreamInfs []*StreamInf
+   Medias     []*Media
 }
 
 // ResolveURIs converts relative URLs to absolute URLs using the base URL.
 func (mp *MasterPlaylist) ResolveURIs(base *url.URL) {
-   for _, streamItem := range mp.Streams {
+   for _, streamItem := range mp.StreamInfs {
       if streamItem.URI != nil {
          streamItem.URI = base.ResolveReference(streamItem.URI)
       }
    }
-   for _, renditionItem := range mp.Medias {
-      if renditionItem.URI != nil {
-         renditionItem.URI = base.ResolveReference(renditionItem.URI)
+   for _, mediaItem := range mp.Medias {
+      if mediaItem.URI != nil {
+         mediaItem.URI = base.ResolveReference(mediaItem.URI)
       }
-   }
-   for _, keyItem := range mp.SessionKeys {
-      keyItem.resolve(base)
    }
 }
 
-// Sort sorts the Streams and Medias slices in place.
-// Streams are sorted by their minimum average bandwidth (if available),
+// Sort sorts the StreamInfs and Medias slices in place.
+// StreamInfs are sorted by their minimum average bandwidth (if available),
 // otherwise falling back to minimum bandwidth.
-// ExtMedias (Medias) are sorted by GroupID.
+// Medias are sorted by GroupID.
 func (mp *MasterPlaylist) Sort() {
-   sort.Slice(mp.Streams, func(i, j int) bool {
-      return mp.Streams[i].SortBandwidth() < mp.Streams[j].SortBandwidth()
+   sort.Slice(mp.StreamInfs, func(i, j int) bool {
+      return mp.StreamInfs[i].SortBandwidth() < mp.StreamInfs[j].SortBandwidth()
    })
    sort.Slice(mp.Medias, func(i, j int) bool {
       return mp.Medias[i].GroupID < mp.Medias[j].GroupID
    })
 }
 
-// ExtMedia represents an #EXT-X-MEDIA tag.
-type ExtMedia struct {
+// Media represents an #EXT-X-MEDIA tag.
+type Media struct {
    Type            string
    GroupID         string
    Name            string
@@ -110,8 +106,8 @@ type ExtMedia struct {
    ID              int
 }
 
-// String returns a multi-line summary of the ExtMedia.
-func (r *ExtMedia) String() string {
+// String returns a multi-line summary of the Media.
+func (r *Media) String() string {
    var builder strings.Builder
    builder.WriteString("type = ")
    builder.WriteString(r.Type)
@@ -135,17 +131,15 @@ func (r *ExtMedia) String() string {
 func parseMaster(lines []string) (*MasterPlaylist, error) {
    masterPlaylist := &MasterPlaylist{}
    streamCounter := 0
-   streamMap := make(map[string]*ExtStream) // Map URL to ExtStream to handle grouping
+   streamMap := make(map[string]*StreamInf) // Map URL to StreamInf to handle grouping
 
    for i := 0; i < len(lines); i++ {
       line := lines[i]
       if strings.HasPrefix(line, "#EXT-X-MEDIA:") {
-         rendition := parseRendition(line)
-         rendition.ID = streamCounter
+         media := parseMediaTag(line)
+         media.ID = streamCounter
          streamCounter++
-         masterPlaylist.Medias = append(masterPlaylist.Medias, rendition)
-      } else if strings.HasPrefix(line, "#EXT-X-SESSION-KEY:") {
-         masterPlaylist.SessionKeys = append(masterPlaylist.SessionKeys, parseKey(line))
+         masterPlaylist.Medias = append(masterPlaylist.Medias, media)
       } else if strings.HasPrefix(line, "#EXT-X-STREAM-INF:") {
          attrs := parseAttributes(line, "#EXT-X-STREAM-INF:")
 
@@ -157,17 +151,17 @@ func parseMaster(lines []string) (*MasterPlaylist, error) {
 
          stream, exists := streamMap[uriLine]
          if !exists {
-            // First time seeing this URI, create a new ExtStream
-            stream = &ExtStream{ID: streamCounter}
+            // First time seeing this URI, create a new StreamInf
+            stream = &StreamInf{ID: streamCounter}
             streamCounter++
             if parsedURL, err := url.Parse(uriLine); err == nil {
                stream.URI = parsedURL
             }
             streamMap[uriLine] = stream
-            masterPlaylist.Streams = append(masterPlaylist.Streams, stream)
+            masterPlaylist.StreamInfs = append(masterPlaylist.StreamInfs, stream)
 
             // This is the first so it's automatically the lowest bandwidth; populate all fields
-            populateStreamAttributes(stream, attrs)
+            populateStreamInfAttributes(stream, attrs)
          }
 
          // Always add the AUDIO group from the current tag to the list.
@@ -178,15 +172,15 @@ func parseMaster(lines []string) (*MasterPlaylist, error) {
          // Check if this variant has a lower bandwidth than the one stored.
          // If so, update the stream's primary attributes.
          if bw, _ := strconv.Atoi(attrs["BANDWIDTH"]); exists && bw < stream.Bandwidth {
-            populateStreamAttributes(stream, attrs)
+            populateStreamInfAttributes(stream, attrs)
          }
       }
    }
    return masterPlaylist, nil
 }
 
-// populateStreamAttributes updates a ExtStream's fields from a map of attributes.
-func populateStreamAttributes(stream *ExtStream, attrs map[string]string) {
+// populateStreamInfAttributes updates a StreamInf's fields from a map of attributes.
+func populateStreamInfAttributes(stream *StreamInf, attrs map[string]string) {
    stream.Codecs = attrs["CODECS"]
    stream.Resolution = attrs["RESOLUTION"]
    stream.FrameRate = attrs["FRAME-RATE"]
@@ -195,9 +189,9 @@ func populateStreamAttributes(stream *ExtStream, attrs map[string]string) {
    stream.AverageBandwidth, _ = strconv.Atoi(attrs["AVERAGE-BANDWIDTH"])
 }
 
-func parseRendition(line string) *ExtMedia {
+func parseMediaTag(line string) *Media {
    attrs := parseAttributes(line, "#EXT-X-MEDIA:")
-   newRendition := &ExtMedia{
+   newMedia := &Media{
       Type:            attrs["TYPE"],
       GroupID:         attrs["GROUP-ID"],
       Name:            attrs["NAME"],
@@ -210,8 +204,8 @@ func parseRendition(line string) *ExtMedia {
    }
    if value, ok := attrs["URI"]; ok && value != "" {
       if parsedURL, err := url.Parse(value); err == nil {
-         newRendition.URI = parsedURL
+         newMedia.URI = parsedURL
       }
    }
-   return newRendition
+   return newMedia
 }

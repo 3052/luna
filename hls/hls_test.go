@@ -59,12 +59,12 @@ func TestDecodeMaster(t *testing.T) {
       t.Fatalf("DecodeMaster failed: %v", err)
    }
    // The sample manifest has 8 unique video stream URIs.
-   if len(master.Streams) != 8 {
-      t.Errorf("Expected 8 unique streams, got %d", len(master.Streams))
+   if len(master.StreamInfs) != 8 {
+      t.Errorf("Expected 8 unique streams, got %d", len(master.StreamInfs))
    }
    // Find a specific stream to verify grouping of audio tracks.
-   var foundStream *ExtStream
-   for _, stream := range master.Streams {
+   var foundStream *StreamInf
+   for _, stream := range master.StreamInfs {
       if strings.Contains(stream.URI.Path, "8500_complete") {
          foundStream = stream
          break
@@ -78,18 +78,18 @@ func TestDecodeMaster(t *testing.T) {
       t.Errorf("Expected stream to have 2 audio groups, got %d", len(foundStream.Audio))
    }
 
-   // Sort the renditions and streams
+   // Sort the medias and streams
    master.Sort()
 
-   // Print all renditions (Medias) first
-   t.Log("--- Renditions (sorted by GroupID) ---")
-   for _, rendition := range master.Medias {
-      t.Logf("%s\n---", rendition)
+   // Print all Medias first
+   t.Log("--- Medias (sorted by GroupID) ---")
+   for _, media := range master.Medias {
+      t.Logf("%s\n---", media)
    }
 
    // Print all streams and their grouped variants
-   t.Log("\n--- Streams (sorted by Average/Min Bandwidth) ---")
-   for _, stream := range master.Streams {
+   t.Log("\n--- StreamInfs (sorted by Average/Min Bandwidth) ---")
+   for _, stream := range master.StreamInfs {
       t.Logf("%s\n---", stream)
    }
 }

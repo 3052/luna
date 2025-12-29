@@ -7,14 +7,14 @@ import (
    "strings"
 )
 
-// Key represents encryption info (#EXT-X-KEY or #EXT-X-SESSION-KEY)
+// Key represents encryption info from a #EXT-X-KEY tag.
 type Key struct {
    Method            string
    URI               *url.URL
    KeyFormat         string
    KeyFormatVersions string
    IV                string
-   Characteristics   string // For session keys
+   Characteristics   string
 }
 
 func (k *Key) resolve(base *url.URL) {
@@ -44,21 +44,8 @@ func (k *Key) DecodeData() ([]byte, error) {
    return base64.StdEncoding.DecodeString(dataString)
 }
 
-// DateRange represents metadata time spans (#EXT-X-DATERANGE)
-type DateRange struct {
-   ID        string
-   Class     string
-   StartDate string
-   EndDate   string
-   Cue       string
-   AssetList string
-}
-
 func parseKey(line string) *Key {
    prefix := "#EXT-X-KEY:"
-   if strings.HasPrefix(line, "#EXT-X-SESSION-KEY:") {
-      prefix = "#EXT-X-SESSION-KEY:"
-   }
    attrs := parseAttributes(line, prefix)
    newKey := &Key{
       Method:            attrs["METHOD"],
@@ -73,16 +60,4 @@ func parseKey(line string) *Key {
       }
    }
    return newKey
-}
-
-func parseDateRange(line string) *DateRange {
-   attrs := parseAttributes(line, "#EXT-X-DATERANGE:")
-   return &DateRange{
-      ID:        attrs["ID"],
-      Class:     attrs["CLASS"],
-      StartDate: attrs["START-DATE"],
-      EndDate:   attrs["END-DATE"],
-      Cue:       attrs["CUE"],
-      AssetList: attrs["X-ASSET-LIST"],
-   }
 }
