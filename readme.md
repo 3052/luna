@@ -12,4 +12,6 @@
    <dd>27@riseup.net</dd>
    <dt>Discord username</dt>
    <dd>10308</dd>
+   <dt>Discord invite</dt>
+   <dd>https://discord.com/invite/rMFzDRQhSx</dd>
 </dl>
