@@ -9,10 +9,8 @@ import (
 // ContentProtection specifies DRM schemes.
 type ContentProtection struct {
    SchemeIdUri string `xml:"schemeIdUri,attr"`
-   // DefaultKid maps to cenc:default_KID (urn:mpeg:cenc:2013)
-   DefaultKid string `xml:"urn:mpeg:cenc:2013 default_KID,attr"`
-   // Pssh maps to the cenc:pssh element (urn:mpeg:cenc:2013)
-   Pssh string `xml:"urn:mpeg:cenc:2013 pssh"`
+   DefaultKid string `xml:"default_KID,attr"`
+   Pssh string `xml:"pssh"`
 }
 
 // GetDefaultKid returns the DefaultKid as a byte slice.
