@@ -9,8 +9,8 @@ import (
 // ContentProtection specifies DRM schemes.
 type ContentProtection struct {
    SchemeIdUri string `xml:"schemeIdUri,attr"`
-   DefaultKid string `xml:"default_KID,attr"`
-   Pssh string `xml:"pssh"`
+   DefaultKid  string `xml:"default_KID,attr"`
+   Pssh        string `xml:"pssh"`
 }
 
 // GetDefaultKid returns the DefaultKid as a byte slice.
