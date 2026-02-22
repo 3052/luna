@@ -10,30 +10,29 @@ import (
 // Key represents encryption info from a #EXT-X-KEY tag.
 type Key struct {
    Method            string
-   URI               *url.URL
+   Uri               *url.URL
    KeyFormat         string
    KeyFormatVersions string
-   IV                string
    Characteristics   string
 }
 
 func (k *Key) resolve(base *url.URL) {
-   if k.URI != nil {
-      k.URI = base.ResolveReference(k.URI)
+   if k.Uri != nil {
+      k.Uri = base.ResolveReference(k.Uri)
    }
 }
 
 // DecodeData extracts and decodes the Base64 data directly from the URL Opaque field.
 func (k *Key) DecodeData() ([]byte, error) {
-   if k.URI == nil {
+   if k.Uri == nil {
       return nil, errors.New("URI is nil")
    }
-   if k.URI.Scheme != "data" {
+   if k.Uri.Scheme != "data" {
       return nil, errors.New("URI is not a data URI")
    }
    // For data URIs, net/url stores the content (mime+encoding+data) in Opaque.
    // Format: [<mediatype>][;base64],<data>
-   meta, dataString, found := strings.Cut(k.URI.Opaque, ",")
+   meta, dataString, found := strings.Cut(k.Uri.Opaque, ",")
    if !found {
       return nil, errors.New("invalid data URI: missing comma separator")
    }
@@ -51,12 +50,11 @@ func parseKey(line string) *Key {
       Method:            attrs["METHOD"],
       KeyFormat:         attrs["KEYFORMAT"],
       KeyFormatVersions: attrs["KEYFORMATVERSIONS"],
-      IV:                attrs["IV"],
       Characteristics:   attrs["CHARACTERISTICS"],
    }
    if value, ok := attrs["URI"]; ok && value != "" {
-      if parsedURL, err := url.Parse(value); err == nil {
-         newKey.URI = parsedURL
+      if parsedUrl, err := url.Parse(value); err == nil {
+         newKey.Uri = parsedUrl
       }
    }
    return newKey

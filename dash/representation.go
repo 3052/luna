@@ -1,36 +1,20 @@
 package dash
 
 import (
+   "cmp"
    "net/url"
    "strconv"
    "strings"
 )
-
-// Representation describes a version of the media content.
-type Representation struct {
-   AverageBandwidth  int                  `xml:"-"`
-   Bandwidth         int                  `xml:"bandwidth,attr"`
-   BaseUrl           string               `xml:"BaseURL"`
-   Codecs            string               `xml:"codecs,attr"`
-   ContentProtection []*ContentProtection `xml:"ContentProtection"`
-   Height            int                  `xml:"height,attr"`
-   Id                string               `xml:"id,attr"`
-   MimeType          string               `xml:"mimeType,attr"`
-   Parent            *AdaptationSet       `xml:"-"`
-   SegmentBase       *SegmentBase         `xml:"SegmentBase"`
-   SegmentList       *SegmentList         `xml:"SegmentList"`
-   SegmentTemplate   *SegmentTemplate     `xml:"SegmentTemplate"`
-   Width             int                  `xml:"width,attr"`
-}
 
 // String returns a multi-line summary of the Representation.
 func (r *Representation) String() string {
    var data strings.Builder
    data.WriteString("bandwidth = ")
    data.WriteString(strconv.Itoa(r.Bandwidth))
-   if r.AverageBandwidth >= 1 {
-      data.WriteString("average bandwidth = ")
-      data.WriteString(strconv.Itoa(r.AverageBandwidth))
+   if r.MedianBandwidth >= 1 {
+      data.WriteString("\nmedian bandwidth = ")
+      data.WriteString(strconv.Itoa(r.MedianBandwidth))
    }
    if width := r.GetWidth(); width != 0 {
       data.WriteString("\nwidth = ")
@@ -57,9 +41,9 @@ func (r *Representation) String() string {
       data.WriteString("\nrole = ")
       data.WriteString(role)
    }
-   if periodId := r.GetPeriodId(); periodId != "" {
-      data.WriteString("\nperiod = ")
-      data.WriteString(periodId)
+   if periodDuration := r.GetPeriodDuration(); periodDuration != "" {
+      data.WriteString("\nperiod duration = ")
+      data.WriteString(periodDuration)
    }
    data.WriteString("\nid = ")
    data.WriteString(r.Id)
@@ -152,6 +136,13 @@ func (r *Representation) GetPeriodId() string {
    return ""
 }
 
+func (r *Representation) GetPeriodDuration() string {
+   if r.Parent != nil && r.Parent.Parent != nil {
+      return r.Parent.Parent.Duration
+   }
+   return ""
+}
+
 func (r *Representation) GetContentProtection() []*ContentProtection {
    if len(r.ContentProtection) > 0 {
       return r.ContentProtection
@@ -180,4 +171,27 @@ func (r *Representation) link() {
       r.SegmentList.Parent = r
       r.SegmentList.link()
    }
+}
+func Bandwidth(r1, r2 *Representation) int {
+   return cmp.Or(
+      r1.MedianBandwidth-r2.MedianBandwidth,
+      r1.Bandwidth-r2.Bandwidth,
+   )
+}
+
+// Representation describes a version of the media content.
+type Representation struct {
+   Bandwidth         int                  `xml:"bandwidth,attr"`
+   BaseUrl           string               `xml:"BaseURL"`
+   Codecs            string               `xml:"codecs,attr"`
+   ContentProtection []*ContentProtection `xml:"ContentProtection"`
+   Height            int                  `xml:"height,attr"`
+   Id                string               `xml:"id,attr"`
+   MedianBandwidth   int                  `xml:"-"`
+   MimeType          string               `xml:"mimeType,attr"`
+   Parent            *AdaptationSet       `xml:"-"`
+   SegmentBase       *SegmentBase         `xml:"SegmentBase"`
+   SegmentList       *SegmentList         `xml:"SegmentList"`
+   SegmentTemplate   *SegmentTemplate     `xml:"SegmentTemplate"`
+   Width             int                  `xml:"width,attr"`
 }
