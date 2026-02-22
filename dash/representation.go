@@ -2,16 +2,36 @@ package dash
 
 import (
    "net/url"
-   "slices"
    "strconv"
    "strings"
 )
+
+// Representation describes a version of the media content.
+type Representation struct {
+   AverageBandwidth  int                  `xml:"-"`
+   Bandwidth         int                  `xml:"bandwidth,attr"`
+   BaseUrl           string               `xml:"BaseURL"`
+   Codecs            string               `xml:"codecs,attr"`
+   ContentProtection []*ContentProtection `xml:"ContentProtection"`
+   Height            int                  `xml:"height,attr"`
+   Id                string               `xml:"id,attr"`
+   MimeType          string               `xml:"mimeType,attr"`
+   Parent            *AdaptationSet       `xml:"-"`
+   SegmentBase       *SegmentBase         `xml:"SegmentBase"`
+   SegmentList       *SegmentList         `xml:"SegmentList"`
+   SegmentTemplate   *SegmentTemplate     `xml:"SegmentTemplate"`
+   Width             int                  `xml:"width,attr"`
+}
 
 // String returns a multi-line summary of the Representation.
 func (r *Representation) String() string {
    var data strings.Builder
    data.WriteString("bandwidth = ")
    data.WriteString(strconv.Itoa(r.Bandwidth))
+   if r.AverageBandwidth >= 1 {
+      data.WriteString("average bandwidth = ")
+      data.WriteString(strconv.Itoa(r.AverageBandwidth))
+   }
    if width := r.GetWidth(); width != 0 {
       data.WriteString("\nwidth = ")
       data.WriteString(strconv.Itoa(width))
@@ -44,22 +64,6 @@ func (r *Representation) String() string {
    data.WriteString("\nid = ")
    data.WriteString(r.Id)
    return data.String()
-}
-
-// Representation describes a version of the media content.
-type Representation struct {
-   Bandwidth         int                  `xml:"bandwidth,attr"`
-   Codecs            string               `xml:"codecs,attr"`
-   Height            int                  `xml:"height,attr"`
-   Id                string               `xml:"id,attr"`
-   MimeType          string               `xml:"mimeType,attr"`
-   Width             int                  `xml:"width,attr"`
-   BaseUrl           string               `xml:"BaseURL"`
-   SegmentTemplate   *SegmentTemplate     `xml:"SegmentTemplate"`
-   ContentProtection []*ContentProtection `xml:"ContentProtection"`
-   SegmentBase       *SegmentBase         `xml:"SegmentBase"`
-   SegmentList       *SegmentList         `xml:"SegmentList"`
-   Parent            *AdaptationSet       `xml:"-"`
 }
 
 // ResolveBaseUrl resolves the Representation's BaseURL against the parent hierarchy.
@@ -176,13 +180,4 @@ func (r *Representation) link() {
       r.SegmentList.Parent = r
       r.SegmentList.link()
    }
-}
-
-// SortByBandwidth sorts a slice of Representations in-place by their Bandwidth
-// in ascending order (lowest to highest).
-// This function requires Go 1.21+.
-func SortByBandwidth(reps []*Representation) {
-   slices.SortFunc(reps, func(a, b *Representation) int {
-      return a.Bandwidth - b.Bandwidth
-   })
 }
