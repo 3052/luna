@@ -23,6 +23,24 @@ type StreamInf struct {
    Audio            []string // A list of associated audio Media GROUP-IDs
 }
 
+func parseMediaTag(line string) *Media {
+   attrs := parseAttributes(line, "#EXT-X-MEDIA:")
+   newMedia := &Media{
+      Type:       attrs["TYPE"],
+      GroupID:    attrs["GROUP-ID"],
+      Name:       attrs["NAME"],
+      Language:   attrs["LANGUAGE"],
+      Channels:   attrs["CHANNELS"],
+      AutoSelect: attrs["AUTOSELECT"] == "YES",
+   }
+   if value, ok := attrs["URI"]; ok && value != "" {
+      if parsedURL, err := url.Parse(value); err == nil {
+         newMedia.URI = parsedURL
+      }
+   }
+   return newMedia
+}
+
 // String returns a multi-line summary of the StreamInf.
 func (s *StreamInf) String() string {
    var builder strings.Builder
@@ -93,17 +111,14 @@ func (mp *MasterPlaylist) Sort() {
 
 // Media represents an #EXT-X-MEDIA tag.
 type Media struct {
-   Type            string
-   GroupID         string
-   Name            string
-   Language        string
-   URI             *url.URL
-   AutoSelect      bool
-   Default         bool
-   Forced          bool
-   Channels        string
-   Characteristics string
-   ID              int
+   ID         int
+   Type       string
+   GroupID    string
+   Name       string
+   Language   string
+   AutoSelect bool
+   Channels   string
+   URI        *url.URL
 }
 
 // String returns a multi-line summary of the Media.
@@ -187,25 +202,4 @@ func populateStreamInfAttributes(stream *StreamInf, attrs map[string]string) {
    stream.Subtitles = attrs["SUBTITLES"]
    stream.Bandwidth, _ = strconv.Atoi(attrs["BANDWIDTH"])
    stream.AverageBandwidth, _ = strconv.Atoi(attrs["AVERAGE-BANDWIDTH"])
-}
-
-func parseMediaTag(line string) *Media {
-   attrs := parseAttributes(line, "#EXT-X-MEDIA:")
-   newMedia := &Media{
-      Type:            attrs["TYPE"],
-      GroupID:         attrs["GROUP-ID"],
-      Name:            attrs["NAME"],
-      Language:        attrs["LANGUAGE"],
-      Channels:        attrs["CHANNELS"],
-      Characteristics: attrs["CHARACTERISTICS"],
-      AutoSelect:      attrs["AUTOSELECT"] == "YES",
-      Default:         attrs["DEFAULT"] == "YES",
-      Forced:          attrs["FORCED"] == "YES",
-   }
-   if value, ok := attrs["URI"]; ok && value != "" {
-      if parsedURL, err := url.Parse(value); err == nil {
-         newMedia.URI = parsedURL
-      }
-   }
-   return newMedia
 }
