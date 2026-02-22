@@ -18,8 +18,7 @@ type MediaPlaylist struct {
    EndList        bool
 }
 
-// ResolveURIs converts relative URLs to absolute URLs using the base URL.
-func (mp *MediaPlaylist) ResolveURIs(base *url.URL) {
+func (mp *MediaPlaylist) ResolveUris(base *url.URL) {
    for _, keyItem := range mp.Keys {
       keyItem.resolve(base)
    }
@@ -32,15 +31,15 @@ func (mp *MediaPlaylist) ResolveURIs(base *url.URL) {
 }
 
 type Segment struct {
-   URI      *url.URL
+   Uri      *url.URL
    Duration float64
    Title    string
 }
 
 // resolve updates the Segment's URI to be absolute.
 func (s *Segment) resolve(base *url.URL) {
-   if s.URI != nil {
-      s.URI = base.ResolveReference(s.URI)
+   if s.Uri != nil {
+      s.Uri = base.ResolveReference(s.Uri)
    }
 }
 
@@ -78,8 +77,8 @@ func parseMedia(lines []string) (*MediaPlaylist, error) {
       case strings.HasPrefix(line, "#EXT-X-MAP:"):
          attrs := parseAttributes(line, "#EXT-X-MAP:")
          if value, ok := attrs["URI"]; ok && value != "" {
-            if parsedURL, err := url.Parse(value); err == nil {
-               mediaPlaylist.Map = parsedURL
+            if parsedUrl, err := url.Parse(value); err == nil {
+               mediaPlaylist.Map = parsedUrl
             }
          }
       case strings.HasPrefix(line, "#EXTINF:"):
@@ -99,8 +98,8 @@ func parseMedia(lines []string) (*MediaPlaylist, error) {
          if i+1 < len(lines) {
             nextLine := lines[i+1]
             if !strings.HasPrefix(nextLine, "#") && nextLine != "" {
-               if parsedURL, err := url.Parse(nextLine); err == nil {
-                  newSegment.URI = parsedURL
+               if parsedUrl, err := url.Parse(nextLine); err == nil {
+                  newSegment.Uri = parsedUrl
                }
                i++
             }
