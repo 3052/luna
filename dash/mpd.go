@@ -6,6 +6,20 @@ import (
    "strconv"
 )
 
+func resolveRef(base *url.URL, relStr string) (*url.URL, error) {
+   if relStr == "" {
+      return base, nil
+   }
+   rel, err := url.Parse(relStr)
+   if err != nil {
+      return nil, err
+   }
+   if base == nil {
+      return rel, nil
+   }
+   return base.ResolveReference(rel), nil
+}
+
 // Parse takes a byte slice of an MPD file, unmarshals it,
 // links navigation parents, and normalizes Representation IDs.
 func Parse(data []byte) (*Mpd, error) {
@@ -94,18 +108,4 @@ func (m *Mpd) link() {
       manifestPeriod.Parent = m
       manifestPeriod.link()
    }
-}
-
-func resolveRef(base *url.URL, relStr string) (*url.URL, error) {
-   if relStr == "" {
-      return base, nil
-   }
-   rel, err := url.Parse(relStr)
-   if err != nil {
-      return nil, err
-   }
-   if base == nil {
-      return rel, nil
-   }
-   return base.ResolveReference(rel), nil
 }
