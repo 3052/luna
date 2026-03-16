@@ -7,6 +7,13 @@ import (
    "strings"
 )
 
+func Bandwidth(r1, r2 *Representation) int {
+   return cmp.Or(
+      r1.MedianBandwidth-r2.MedianBandwidth,
+      r1.Bandwidth-r2.Bandwidth,
+   )
+}
+
 // Representation describes a version of the media content.
 type Representation struct {
    Bandwidth         int                  `xml:"bandwidth,attr"`
@@ -188,11 +195,4 @@ func (r *Representation) link() {
       r.SegmentList.Parent = r
       r.SegmentList.link()
    }
-}
-
-func Bandwidth(r1, r2 *Representation) int {
-   return cmp.Or(
-      r1.MedianBandwidth-r2.MedianBandwidth,
-      r1.Bandwidth-r2.Bandwidth,
-   )
 }
