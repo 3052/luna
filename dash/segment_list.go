@@ -2,23 +2,6 @@ package dash
 
 import "net/url"
 
-// SegmentList contains a list of SegmentUrls.
-type SegmentList struct {
-   Duration       uint            `xml:"duration,attr"`
-   Timescale      *uint           `xml:"timescale,attr"`
-   Initialization *Initialization `xml:"Initialization"`
-   SegmentUrls    []*SegmentUrl   `xml:"SegmentURL"`
-   // Navigation
-   Parent *Representation `xml:"-"`
-}
-
-// SegmentUrl defines a specific media segment source.
-type SegmentUrl struct {
-   Media string `xml:"media,attr"`
-   // Navigation
-   Parent *SegmentList `xml:"-"`
-}
-
 func (sl *SegmentList) GetTimescale() uint {
    if sl.Timescale != nil {
       return *sl.Timescale
@@ -38,6 +21,25 @@ func (sl *SegmentList) link() {
       mediaUrl.Parent = sl
    }
 }
+
+// SegmentList contains a list of SegmentUrls.
+type SegmentList struct {
+   Duration       uint            `xml:"duration,attr"`
+   Timescale      *uint           `xml:"timescale,attr"`
+   Initialization *Initialization `xml:"Initialization"`
+   SegmentUrls    []*SegmentUrl   `xml:"SegmentURL"`
+   // Navigation
+   Parent *Representation `xml:"-"`
+}
+
+// SegmentUrl defines a specific media segment source.
+type SegmentUrl struct {
+   Media string `xml:"media,attr"`
+   // Navigation
+   Parent *SegmentList `xml:"-"`
+}
+
+///
 
 // ResolveMedia resolves the @media attribute against the parent SegmentList's context.
 func (su *SegmentUrl) ResolveMedia() (*url.URL, error) {
