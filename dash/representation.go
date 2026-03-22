@@ -7,6 +7,13 @@ import (
    "strings"
 )
 
+func Bandwidth(r1, r2 *Representation) int {
+   return cmp.Or(
+      r1.MedianBandwidth-r2.MedianBandwidth,
+      r1.Bandwidth-r2.Bandwidth,
+   )
+}
+
 // String returns a multi-line summary of the Representation.
 func (r *Representation) String() string {
    var data strings.Builder
@@ -174,12 +181,6 @@ func (r *Representation) link() {
       r.SegmentList.Parent = r
       r.SegmentList.link()
    }
-}
-func Bandwidth(r1, r2 *Representation) int {
-   return cmp.Or(
-      r1.MedianBandwidth-r2.MedianBandwidth,
-      r1.Bandwidth-r2.Bandwidth,
-   )
 }
 
 // Representation describes a version of the media content.
