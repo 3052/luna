@@ -39,8 +39,6 @@ type SegmentUrl struct {
    Parent *SegmentList `xml:"-"`
 }
 
-///
-
 // ResolveMedia resolves the @media attribute against the parent SegmentList's context.
 func (su *SegmentUrl) ResolveMedia() (*url.URL, error) {
    base, err := su.Parent.getParentBaseUrl()
