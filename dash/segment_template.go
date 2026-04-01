@@ -8,6 +8,12 @@ import (
    "strings"
 )
 
+// S represents a segment within the timeline.
+type S struct {
+   D uint `xml:"d,attr"` // Duration
+   R int  `xml:"r,attr"` // Repeat count
+}
+
 // SegmentTemplate defines specific rules for generating segment URLs.
 type SegmentTemplate struct {
    Duration               uint             `xml:"duration,attr"`
@@ -28,11 +34,7 @@ type SegmentTimeline struct {
    S []*S `xml:"S"`
 }
 
-// S represents a segment within the timeline.
-type S struct {
-   D uint `xml:"d,attr"` // Duration
-   R int  `xml:"r,attr"` // Repeat count
-}
+///
 
 func (st *SegmentTemplate) GetStartNumber() uint {
    if st.StartNumber != nil {
