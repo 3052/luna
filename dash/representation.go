@@ -7,13 +7,6 @@ import (
    "strings"
 )
 
-func Bandwidth(r1, r2 *Representation) int {
-   return cmp.Or(
-      r1.MedianBandwidth-r2.MedianBandwidth,
-      r1.Bandwidth-r2.Bandwidth,
-   )
-}
-
 // String returns a multi-line summary of the Representation.
 func (r *Representation) String() string {
    var data strings.Builder
@@ -198,4 +191,10 @@ type Representation struct {
    SegmentList       *SegmentList         `xml:"SegmentList"`
    SegmentTemplate   *SegmentTemplate     `xml:"SegmentTemplate"`
    Width             int                  `xml:"width,attr"`
+}
+func Bandwidth(r1, r2 *Representation) int {
+   return cmp.Or(
+      r1.MedianBandwidth-r2.MedianBandwidth,
+      r1.Bandwidth-r2.Bandwidth,
+   )
 }
