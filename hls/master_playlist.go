@@ -8,7 +8,42 @@ import (
    "strings"
 )
 
-func parseMediaTag(line string) *Media {
+// String returns a multi-line summary of the Media.
+func (r *Media) String() string {
+   data := &strings.Builder{}
+   fmt.Fprintln(data, "type =", r.Type)
+   if r.Name != "" {
+      fmt.Fprintln(data, "name =", r.Name)
+   }
+   if r.Language != "" {
+      fmt.Fprintln(data, "lang =", r.Language)
+   }
+   if r.GroupId != "" {
+      fmt.Fprintln(data, "group =", r.GroupId)
+   }
+   fmt.Fprint(data, "id = ", r.Id)
+   return data.String()
+}
+
+// String returns a multi-line summary of the StreamInf.
+func (s *StreamInf) String() string {
+   data := &strings.Builder{}
+   if s.AverageBandwidth > 0 {
+      fmt.Fprintln(data, "average bandwidth =", s.AverageBandwidth)
+   }
+   fmt.Fprintln(data, "bandwidth =", s.Bandwidth)
+   if s.Resolution != "" {
+      fmt.Fprintln(data, "resolution =", s.Resolution)
+   }
+   if s.Codecs != "" {
+      videoCodec, _, _ := strings.Cut(s.Codecs, ",")
+      fmt.Fprintln(data, "codecs =", videoCodec)
+   }
+   fmt.Fprint(data, "id = ", s.Id)
+   return data.String()
+}
+
+func parseMediaTag(line string) (*Media, error) {
    attrs := parseAttributes(line, "#EXT-X-MEDIA:")
    newMedia := &Media{
       Type:       attrs["TYPE"],
@@ -19,39 +54,13 @@ func parseMediaTag(line string) *Media {
       AutoSelect: attrs["AUTOSELECT"] == "YES",
    }
    if value, ok := attrs["URI"]; ok && value != "" {
-      if parsedUrl, err := url.Parse(value); err == nil {
-         newMedia.Uri = parsedUrl
+      parsedUrl, err := url.Parse(value)
+      if err != nil {
+         return nil, fmt.Errorf("invalid URI in EXT-X-MEDIA: %w", err)
       }
+      newMedia.Uri = parsedUrl
    }
-   return newMedia
-}
-
-// String returns a multi-line summary of the StreamInf.
-func (s *StreamInf) String() string {
-   var builder strings.Builder
-
-   if s.AverageBandwidth > 0 {
-      builder.WriteString("average_bandwidth = ")
-      builder.WriteString(strconv.Itoa(s.AverageBandwidth))
-      builder.WriteString("\n")
-   }
-
-   builder.WriteString("bandwidth = ")
-   builder.WriteString(strconv.Itoa(s.Bandwidth))
-
-   if s.Resolution != "" {
-      builder.WriteString("\nresolution = ")
-      builder.WriteString(s.Resolution)
-   }
-
-   if s.Codecs != "" {
-      videoCodec, _, _ := strings.Cut(s.Codecs, ",")
-      builder.WriteString("\ncodecs = ")
-      builder.WriteString(videoCodec)
-   }
-
-   builder.WriteString(fmt.Sprintf("\nid = %d", s.Id))
-   return builder.String()
+   return newMedia, nil
 }
 
 func (mp *MasterPlaylist) ResolveUris(base *url.URL) {
@@ -67,28 +76,6 @@ func (mp *MasterPlaylist) ResolveUris(base *url.URL) {
    }
 }
 
-// String returns a multi-line summary of the Media.
-func (r *Media) String() string {
-   var builder strings.Builder
-   builder.WriteString("type = ")
-   builder.WriteString(r.Type)
-   if r.Name != "" {
-      builder.WriteString("\nname = ")
-      builder.WriteString(r.Name)
-   }
-   if r.Language != "" {
-      builder.WriteString("\nlang = ")
-      builder.WriteString(r.Language)
-   }
-   if r.GroupId != "" {
-      builder.WriteString("\ngroup = ")
-      builder.WriteString(r.GroupId)
-   }
-   builder.WriteString("\nid = ")
-   builder.WriteString(strconv.Itoa(r.Id))
-   return builder.String()
-}
-
 func parseMaster(lines []string) (*MasterPlaylist, error) {
    masterPlaylist := &MasterPlaylist{}
    streamCounter := 0
@@ -97,7 +84,10 @@ func parseMaster(lines []string) (*MasterPlaylist, error) {
    for i := 0; i < len(lines); i++ {
       line := lines[i]
       if strings.HasPrefix(line, "#EXT-X-MEDIA:") {
-         media := parseMediaTag(line)
+         media, err := parseMediaTag(line)
+         if err != nil {
+            return nil, err
+         }
          media.Id = streamCounter
          streamCounter++
          masterPlaylist.Medias = append(masterPlaylist.Medias, media)
@@ -105,7 +95,7 @@ func parseMaster(lines []string) (*MasterPlaylist, error) {
          attrs := parseAttributes(line, "#EXT-X-STREAM-INF:")
 
          if i+1 >= len(lines) { // Malformed, missing URI
-            continue
+            return nil, fmt.Errorf("malformed EXT-X-STREAM-INF: missing URI")
          }
          i++
          uriLine := lines[i]
@@ -115,14 +105,18 @@ func parseMaster(lines []string) (*MasterPlaylist, error) {
             // First time seeing this URI, create a new StreamInf
             stream = &StreamInf{Id: streamCounter}
             streamCounter++
-            if parsedUrl, err := url.Parse(uriLine); err == nil {
-               stream.Uri = parsedUrl
+            parsedUrl, err := url.Parse(uriLine)
+            if err != nil {
+               return nil, fmt.Errorf("invalid URI in EXT-X-STREAM-INF: %w", err)
             }
+            stream.Uri = parsedUrl
             streamMap[uriLine] = stream
             masterPlaylist.StreamInfs = append(masterPlaylist.StreamInfs, stream)
 
             // This is the first so it's automatically the lowest bandwidth; populate all fields
-            populateStreamInfAttributes(stream, attrs)
+            if err := populateStreamInfAttributes(stream, attrs); err != nil {
+               return nil, err
+            }
          }
 
          // Always add the AUDIO group from the current tag to the list.
@@ -132,8 +126,16 @@ func parseMaster(lines []string) (*MasterPlaylist, error) {
 
          // Check if this variant has a lower bandwidth than the one stored.
          // If so, update the stream's primary attributes.
-         if bw, _ := strconv.Atoi(attrs["BANDWIDTH"]); exists && bw < stream.Bandwidth {
-            populateStreamInfAttributes(stream, attrs)
+         if bwStr := attrs["BANDWIDTH"]; bwStr != "" {
+            bw, err := strconv.Atoi(bwStr)
+            if err != nil {
+               return nil, fmt.Errorf("invalid BANDWIDTH in EXT-X-STREAM-INF: %w", err)
+            }
+            if exists && bw < stream.Bandwidth {
+               if err := populateStreamInfAttributes(stream, attrs); err != nil {
+                  return nil, err
+               }
+            }
          }
       }
    }
@@ -141,13 +143,28 @@ func parseMaster(lines []string) (*MasterPlaylist, error) {
 }
 
 // populateStreamInfAttributes updates a StreamInf's fields from a map of attributes.
-func populateStreamInfAttributes(stream *StreamInf, attrs map[string]string) {
+func populateStreamInfAttributes(stream *StreamInf, attrs map[string]string) error {
    stream.Codecs = attrs["CODECS"]
    stream.Resolution = attrs["RESOLUTION"]
    stream.FrameRate = attrs["FRAME-RATE"]
    stream.Subtitles = attrs["SUBTITLES"]
-   stream.Bandwidth, _ = strconv.Atoi(attrs["BANDWIDTH"])
-   stream.AverageBandwidth, _ = strconv.Atoi(attrs["AVERAGE-BANDWIDTH"])
+
+   if val := attrs["BANDWIDTH"]; val != "" {
+      bw, err := strconv.Atoi(val)
+      if err != nil {
+         return fmt.Errorf("invalid BANDWIDTH: %w", err)
+      }
+      stream.Bandwidth = bw
+   }
+
+   if val := attrs["AVERAGE-BANDWIDTH"]; val != "" {
+      abw, err := strconv.Atoi(val)
+      if err != nil {
+         return fmt.Errorf("invalid AVERAGE-BANDWIDTH: %w", err)
+      }
+      stream.AverageBandwidth = abw
+   }
+   return nil
 }
 
 type MasterPlaylist struct {

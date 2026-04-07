@@ -2,53 +2,40 @@ package dash
 
 import (
    "cmp"
+   "fmt"
    "net/url"
-   "strconv"
    "strings"
 )
 
 // String returns a multi-line summary of the Representation.
 func (r *Representation) String() string {
-   var data strings.Builder
+   data := &strings.Builder{}
    if r.MedianBandwidth >= 1 {
-      data.WriteString("median bandwidth = ")
-      data.WriteString(strconv.Itoa(r.MedianBandwidth))
+      fmt.Fprintln(data, "median bandwidth =", r.MedianBandwidth)
    }
-   if data.Len() >= 1 {
-      data.WriteByte('\n')
-   }
-   data.WriteString("bandwidth = ")
-   data.WriteString(strconv.Itoa(r.Bandwidth))
+   fmt.Fprintln(data, "bandwidth =", r.Bandwidth)
    if width := r.GetWidth(); width != 0 {
-      data.WriteString("\nwidth = ")
-      data.WriteString(strconv.Itoa(width))
+      fmt.Fprintln(data, "width =", width)
    }
    if height := r.GetHeight(); height != 0 {
-      data.WriteString("\nheight = ")
-      data.WriteString(strconv.Itoa(height))
+      fmt.Fprintln(data, "height =", height)
    }
    if codecs := r.GetCodecs(); codecs != "" {
-      data.WriteString("\ncodecs = ")
-      data.WriteString(codecs)
+      fmt.Fprintln(data, "codecs =", codecs)
    }
-   data.WriteString("\nmimeType = ")
-   data.WriteString(r.GetMimeType())
+   fmt.Fprintln(data, "mimeType =", r.GetMimeType())
    if label := r.GetLabel(); label != "" {
-      data.WriteString("\nlabel = ")
-      data.WriteString(label)
+      fmt.Fprintln(data, "label =", label)
    } else if lang := r.GetLang(); lang != "" {
-      data.WriteString("\nlang = ")
-      data.WriteString(lang)
+      fmt.Fprintln(data, "lang =", lang)
    }
    if role := r.GetRole(); role != "" {
-      data.WriteString("\nrole = ")
-      data.WriteString(role)
+      fmt.Fprintln(data, "role =", role)
    }
    if periodDuration := r.GetPeriodDuration(); periodDuration != "" {
-      data.WriteString("\nperiod duration = ")
-      data.WriteString(periodDuration)
+      fmt.Fprintln(data, "period duration =", periodDuration)
    }
-   data.WriteString("\nid = ")
+   data.WriteString("id = ")
    data.WriteString(r.Id)
    return data.String()
 }
@@ -192,6 +179,7 @@ type Representation struct {
    SegmentTemplate   *SegmentTemplate     `xml:"SegmentTemplate"`
    Width             int                  `xml:"width,attr"`
 }
+
 func Bandwidth(r1, r2 *Representation) int {
    return cmp.Or(
       r1.MedianBandwidth-r2.MedianBandwidth,

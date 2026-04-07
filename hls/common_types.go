@@ -3,6 +3,7 @@ package hls
 import (
    "encoding/base64"
    "errors"
+   "fmt"
    "net/url"
    "strings"
 )
@@ -43,7 +44,7 @@ func (k *Key) DecodeData() ([]byte, error) {
    return base64.StdEncoding.DecodeString(dataString)
 }
 
-func parseKey(line string) *Key {
+func parseKey(line string) (*Key, error) {
    prefix := "#EXT-X-KEY:"
    attrs := parseAttributes(line, prefix)
    newKey := &Key{
@@ -53,9 +54,11 @@ func parseKey(line string) *Key {
       Characteristics:   attrs["CHARACTERISTICS"],
    }
    if value, ok := attrs["URI"]; ok && value != "" {
-      if parsedUrl, err := url.Parse(value); err == nil {
-         newKey.Uri = parsedUrl
+      parsedUrl, err := url.Parse(value)
+      if err != nil {
+         return nil, fmt.Errorf("invalid URI in EXT-X-KEY: %w", err)
       }
+      newKey.Uri = parsedUrl
    }
-   return newKey
+   return newKey, nil
 }

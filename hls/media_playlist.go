@@ -72,14 +72,19 @@ func parseMedia(lines []string) (*MediaPlaylist, error) {
       case strings.HasPrefix(line, "#EXT-X-ENDLIST"):
          mediaPlaylist.EndList = true
       case strings.HasPrefix(line, "#EXT-X-KEY:"):
-         newKey := parseKey(line)
+         newKey, err := parseKey(line)
+         if err != nil {
+            return nil, err
+         }
          mediaPlaylist.Keys = append(mediaPlaylist.Keys, newKey)
       case strings.HasPrefix(line, "#EXT-X-MAP:"):
          attrs := parseAttributes(line, "#EXT-X-MAP:")
          if value, ok := attrs["URI"]; ok && value != "" {
-            if parsedUrl, err := url.Parse(value); err == nil {
-               mediaPlaylist.Map = parsedUrl
+            parsedUrl, err := url.Parse(value)
+            if err != nil {
+               return nil, fmt.Errorf("invalid URI in EXT-X-MAP: %w", err)
             }
+            mediaPlaylist.Map = parsedUrl
          }
       case strings.HasPrefix(line, "#EXTINF:"):
          // Parse duration and title
@@ -98,9 +103,11 @@ func parseMedia(lines []string) (*MediaPlaylist, error) {
          if i+1 < len(lines) {
             nextLine := lines[i+1]
             if !strings.HasPrefix(nextLine, "#") && nextLine != "" {
-               if parsedUrl, err := url.Parse(nextLine); err == nil {
-                  newSegment.Uri = parsedUrl
+               parsedUrl, err := url.Parse(nextLine)
+               if err != nil {
+                  return nil, fmt.Errorf("invalid segment URI: %w", err)
                }
+               newSegment.Uri = parsedUrl
                i++
             }
          }

@@ -2,10 +2,15 @@ package dash
 
 import (
    "errors"
+   "fmt"
    "net/url"
    "strconv"
    "strings"
 )
+
+func FormatRange(start, end uint64) string {
+   return fmt.Sprintf("%v-%v", start, end)
+}
 
 func ParseRange(input string) (uint64, uint64, error) {
    startStr, endStr, found := strings.Cut(input, "-")
@@ -21,14 +26,6 @@ func ParseRange(input string) (uint64, uint64, error) {
       return 0, 0, err
    }
    return start, end, nil
-}
-
-func FormatRange(start, end uint64) string {
-   var sb strings.Builder
-   sb.WriteString(strconv.FormatUint(start, 10))
-   sb.WriteByte('-')
-   sb.WriteString(strconv.FormatUint(end, 10))
-   return sb.String()
 }
 
 // Initialization contains URL and byte range information for initialization segments.
