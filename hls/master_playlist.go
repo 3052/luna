@@ -8,6 +8,12 @@ import (
    "strings"
 )
 
+// DecodeMaster parses a Master Playlist.
+func DecodeMaster(content string) (*MasterPlaylist, error) {
+   lines := splitLines(content)
+   return parseMaster(lines)
+}
+
 // String returns a multi-line summary of the Media.
 func (r *Media) String() string {
    data := &strings.Builder{}

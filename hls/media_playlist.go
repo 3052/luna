@@ -7,6 +7,12 @@ import (
    "strings"
 )
 
+// DecodeMedia parses a Media Playlist.
+func DecodeMedia(content string) (*MediaPlaylist, error) {
+   lines := splitLines(content)
+   return parseMedia(lines)
+}
+
 type MediaPlaylist struct {
    TargetDuration int
    MediaSequence  int
