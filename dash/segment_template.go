@@ -29,13 +29,6 @@ type SegmentTemplate struct {
    ParentRepresentation *Representation `xml:"-"`
 }
 
-// SegmentTimeline defines specific timing for segments.
-type SegmentTimeline struct {
-   S []*S `xml:"S"`
-}
-
-///
-
 func (st *SegmentTemplate) GetStartNumber() uint {
    if st.StartNumber != nil {
       return *st.StartNumber
@@ -234,4 +227,9 @@ func (st *SegmentTemplate) getParentBaseUrl() (*url.URL, error) {
       return st.ParentAdaptationSet.getAbsoluteBaseUrl()
    }
    return nil, errors.New("SegmentTemplate has no parent linked")
+}
+
+// SegmentTimeline defines specific timing for segments.
+type SegmentTimeline struct {
+   S []*S `xml:"S"`
 }
