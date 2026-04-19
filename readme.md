@@ -5,6 +5,8 @@
 >
 > [Miranda July](//youtube.com/watch?v=7dMGWporaFE&t=142s)
 
+parser for HLS and DASH media manifests
+
 ## contact
 
 <dl>
