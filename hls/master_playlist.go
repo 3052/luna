@@ -35,19 +35,19 @@ func parseMediaTag(line string) (*Media, error) {
 }
 
 // String returns a multi-line summary of the Media.
-func (r *Media) String() string {
+func (m *Media) String() string {
    data := &strings.Builder{}
-   fmt.Fprintln(data, "type =", r.Type)
-   if r.Name != "" {
-      fmt.Fprintln(data, "name =", r.Name)
+   fmt.Fprintln(data, "type =", m.Type)
+   if m.Name != "" {
+      fmt.Fprintln(data, "name =", m.Name)
    }
-   if r.Language != "" {
-      fmt.Fprintln(data, "lang =", r.Language)
+   if m.Language != "" {
+      fmt.Fprintln(data, "lang =", m.Language)
    }
-   if r.GroupId != "" {
-      fmt.Fprintln(data, "group =", r.GroupId)
+   if m.GroupId != "" {
+      fmt.Fprintln(data, "group =", m.GroupId)
    }
-   fmt.Fprint(data, "id = ", r.Id)
+   fmt.Fprint(data, "id = ", m.Id)
    return data.String()
 }
 
