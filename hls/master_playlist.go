@@ -14,6 +14,26 @@ func DecodeMaster(content string) (*MasterPlaylist, error) {
    return parseMaster(lines)
 }
 
+func parseMediaTag(line string) (*Media, error) {
+   attrs := parseAttributes(line, "#EXT-X-MEDIA:")
+   newMedia := &Media{
+      Type:       attrs["TYPE"],
+      GroupId:    attrs["GROUP-ID"],
+      Name:       attrs["NAME"],
+      Language:   attrs["LANGUAGE"],
+      Channels:   attrs["CHANNELS"],
+      AutoSelect: attrs["AUTOSELECT"] == "YES",
+   }
+   if value, ok := attrs["URI"]; ok && value != "" {
+      parsedUrl, err := url.Parse(value)
+      if err != nil {
+         return nil, fmt.Errorf("invalid URI in EXT-X-MEDIA: %w", err)
+      }
+      newMedia.Uri = parsedUrl
+   }
+   return newMedia, nil
+}
+
 // String returns a multi-line summary of the Media.
 func (r *Media) String() string {
    data := &strings.Builder{}
@@ -49,25 +69,7 @@ func (s *StreamInf) String() string {
    return data.String()
 }
 
-func parseMediaTag(line string) (*Media, error) {
-   attrs := parseAttributes(line, "#EXT-X-MEDIA:")
-   newMedia := &Media{
-      Type:       attrs["TYPE"],
-      GroupId:    attrs["GROUP-ID"],
-      Name:       attrs["NAME"],
-      Language:   attrs["LANGUAGE"],
-      Channels:   attrs["CHANNELS"],
-      AutoSelect: attrs["AUTOSELECT"] == "YES",
-   }
-   if value, ok := attrs["URI"]; ok && value != "" {
-      parsedUrl, err := url.Parse(value)
-      if err != nil {
-         return nil, fmt.Errorf("invalid URI in EXT-X-MEDIA: %w", err)
-      }
-      newMedia.Uri = parsedUrl
-   }
-   return newMedia, nil
-}
+///
 
 func (mp *MasterPlaylist) ResolveUris(base *url.URL) {
    for _, streamItem := range mp.StreamInfs {
