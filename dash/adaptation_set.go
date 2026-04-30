@@ -1,6 +1,9 @@
 package dash
 
-import "net/url"
+import (
+   "net/url"
+   "strings"
+)
 
 // getAbsoluteBaseUrl returns the resolved BaseUrl of the parent Period.
 func (as *AdaptationSet) getAbsoluteBaseUrl() (*url.URL, error) {
@@ -8,6 +11,7 @@ func (as *AdaptationSet) getAbsoluteBaseUrl() (*url.URL, error) {
 }
 
 func (as *AdaptationSet) link() {
+   as.Label = strings.TrimSpace(as.Label)
    if as.SegmentTemplate != nil {
       as.SegmentTemplate.ParentAdaptationSet = as
    }
