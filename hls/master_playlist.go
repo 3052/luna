@@ -8,6 +8,41 @@ import (
    "strings"
 )
 
+// String returns a multi-line summary of the Media.
+func (m *Media) String() string {
+   data := &strings.Builder{}
+   fmt.Fprintln(data, "type:", m.Type)
+   if m.Name != "" {
+      fmt.Fprintln(data, "name:", m.Name)
+   }
+   if m.Language != "" {
+      fmt.Fprintln(data, "lang:", m.Language)
+   }
+   if m.GroupId != "" {
+      fmt.Fprintln(data, "group:", m.GroupId)
+   }
+   fmt.Fprint(data, "id: ", m.Id)
+   return data.String()
+}
+
+// String returns a multi-line summary of the StreamInf.
+func (s *StreamInf) String() string {
+   data := &strings.Builder{}
+   if s.AverageBandwidth > 0 {
+      fmt.Fprintln(data, "average bandwidth:", s.AverageBandwidth)
+   }
+   fmt.Fprintln(data, "bandwidth:", s.Bandwidth)
+   if s.Resolution != "" {
+      fmt.Fprintln(data, "resolution:", s.Resolution)
+   }
+   if s.Codecs != "" {
+      videoCodec, _, _ := strings.Cut(s.Codecs, ",")
+      fmt.Fprintln(data, "codecs:", videoCodec)
+   }
+   fmt.Fprint(data, "id: ", s.Id)
+   return data.String()
+}
+
 // DecodeMaster parses a Master Playlist.
 func DecodeMaster(content string) (*MasterPlaylist, error) {
    lines := splitLines(content)
@@ -33,43 +68,6 @@ func parseMediaTag(line string) (*Media, error) {
    }
    return newMedia, nil
 }
-
-// String returns a multi-line summary of the Media.
-func (m *Media) String() string {
-   data := &strings.Builder{}
-   fmt.Fprintln(data, "type =", m.Type)
-   if m.Name != "" {
-      fmt.Fprintln(data, "name =", m.Name)
-   }
-   if m.Language != "" {
-      fmt.Fprintln(data, "lang =", m.Language)
-   }
-   if m.GroupId != "" {
-      fmt.Fprintln(data, "group =", m.GroupId)
-   }
-   fmt.Fprint(data, "id = ", m.Id)
-   return data.String()
-}
-
-// String returns a multi-line summary of the StreamInf.
-func (s *StreamInf) String() string {
-   data := &strings.Builder{}
-   if s.AverageBandwidth > 0 {
-      fmt.Fprintln(data, "average bandwidth =", s.AverageBandwidth)
-   }
-   fmt.Fprintln(data, "bandwidth =", s.Bandwidth)
-   if s.Resolution != "" {
-      fmt.Fprintln(data, "resolution =", s.Resolution)
-   }
-   if s.Codecs != "" {
-      videoCodec, _, _ := strings.Cut(s.Codecs, ",")
-      fmt.Fprintln(data, "codecs =", videoCodec)
-   }
-   fmt.Fprint(data, "id = ", s.Id)
-   return data.String()
-}
-
-///
 
 func (mp *MasterPlaylist) ResolveUris(base *url.URL) {
    for _, streamItem := range mp.StreamInfs {
