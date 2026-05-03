@@ -11,31 +11,31 @@ import (
 func (r *Representation) String() string {
    data := &strings.Builder{}
    if r.MedianBandwidth >= 1 {
-      fmt.Fprintln(data, "median bandwidth =", r.MedianBandwidth)
+      fmt.Fprintln(data, "median bandwidth:", r.MedianBandwidth)
    }
-   fmt.Fprintln(data, "bandwidth =", r.Bandwidth)
+   fmt.Fprintln(data, "bandwidth:", r.Bandwidth)
    if width := r.GetWidth(); width != 0 {
-      fmt.Fprintln(data, "width =", width)
+      fmt.Fprintln(data, "width:", width)
    }
    if height := r.GetHeight(); height != 0 {
-      fmt.Fprintln(data, "height =", height)
+      fmt.Fprintln(data, "height:", height)
    }
    if codecs := r.GetCodecs(); codecs != "" {
-      fmt.Fprintln(data, "codecs =", codecs)
+      fmt.Fprintln(data, "codecs:", codecs)
    }
-   fmt.Fprintln(data, "mimeType =", r.GetMimeType())
+   fmt.Fprintln(data, "mimeType:", r.GetMimeType())
    if label := r.GetLabel(); label != "" {
-      fmt.Fprintln(data, "label =", label)
+      fmt.Fprintln(data, "label:", label)
    } else if lang := r.GetLang(); lang != "" {
-      fmt.Fprintln(data, "lang =", lang)
+      fmt.Fprintln(data, "lang:", lang)
    }
    if role := r.GetRole(); role != "" {
-      fmt.Fprintln(data, "role =", role)
+      fmt.Fprintln(data, "role:", role)
    }
    if periodDuration := r.GetPeriodDuration(); periodDuration != "" {
-      fmt.Fprintln(data, "period duration =", periodDuration)
+      fmt.Fprintln(data, "period duration:", periodDuration)
    }
-   data.WriteString("id = ")
+   data.WriteString("id: ")
    data.WriteString(r.Id)
    return data.String()
 }
