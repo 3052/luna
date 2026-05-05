@@ -8,6 +8,12 @@ import (
    "strings"
 )
 
+// DecodeMaster parses a Master Playlist.
+func DecodeMaster(content string) (*MasterPlaylist, error) {
+   lines := splitLines(content)
+   return parseMaster(lines)
+}
+
 // String returns a multi-line summary of the Media.
 func (m *Media) String() string {
    data := &strings.Builder{}
@@ -43,11 +49,7 @@ func (s *StreamInf) String() string {
    return data.String()
 }
 
-// DecodeMaster parses a Master Playlist.
-func DecodeMaster(content string) (*MasterPlaylist, error) {
-   lines := splitLines(content)
-   return parseMaster(lines)
-}
+///
 
 func parseMediaTag(line string) (*Media, error) {
    attrs := parseAttributes(line, "#EXT-X-MEDIA:")
