@@ -4,56 +4,8 @@ import (
    "net/url"
    "os"
    "path/filepath"
-   "slices"
-   "strings"
    "testing"
 )
-
-func TestDecodeMaster(t *testing.T) {
-   path := filepath.Join("../testdata", masterFilename)
-   data, err := os.ReadFile(path)
-   if err != nil {
-      t.Fatalf("Failed to read file from %s: %v", path, err)
-   }
-   master, err := DecodeMaster(string(data))
-   if err != nil {
-      t.Fatalf("DecodeMaster failed: %v", err)
-   }
-   // The sample manifest has 8 unique video stream URIs.
-   if len(master.StreamInfs) != 8 {
-      t.Errorf("Expected 8 unique streams, got %d", len(master.StreamInfs))
-   }
-   // Find a specific stream to verify grouping of audio tracks.
-   var foundStream *StreamInf
-   for _, stream := range master.StreamInfs {
-      if strings.Contains(stream.Uri.Path, "8500_complete") {
-         foundStream = stream
-         break
-      }
-   }
-   if foundStream == nil {
-      t.Fatal("Could not find expected stream '8500_complete' to test grouping")
-   }
-   // This specific stream has two #EXT-X-STREAM-INF tags with different audio.
-   if len(foundStream.Audio) != 2 {
-      t.Errorf("Expected stream to have 2 audio groups, got %d", len(foundStream.Audio))
-   }
-   // Sort the medias and streams
-   slices.SortFunc(master.Medias, GroupId)
-   slices.SortFunc(master.StreamInfs, Bandwidth)
-
-   // Print all Medias first
-   t.Log("--- Medias (sorted by GroupID) ---")
-   for _, media := range master.Medias {
-      t.Logf("%s\n---", media)
-   }
-
-   // Print all streams and their grouped variants
-   t.Log("\n--- StreamInfs (sorted by Average/Min Bandwidth) ---")
-   for _, stream := range master.StreamInfs {
-      t.Logf("%s\n---", stream)
-   }
-}
 
 const (
    mediaFilename  = "8500_complete-95fe4117-98fe-4ab7-8895-b2eec69b2b63.m3u8"

@@ -2,8 +2,9 @@ package dash
 
 import (
    "encoding/xml"
+   "fmt"
+   "hash/fnv"
    "net/url"
-   "strconv"
 )
 
 func resolveRef(base *url.URL, relStr string) (*url.URL, error) {
@@ -22,12 +23,13 @@ func resolveRef(base *url.URL, relStr string) (*url.URL, error) {
 
 // Parse takes a byte slice of an MPD file, unmarshals it,
 // links navigation parents, and normalizes Representation IDs.
-func Parse(data []byte) (*Mpd, error) {
+func Parse(data []byte, mpdUrl *url.URL) (*Mpd, error) {
    var manifest Mpd
    err := xml.Unmarshal(data, &manifest)
    if err != nil {
       return nil, err
    }
+   manifest.mpdUrl = mpdUrl
    manifest.link()
    manifest.normalizeIds()
    return &manifest, nil
@@ -38,12 +40,12 @@ type Mpd struct {
    MediaPresentationDuration string    `xml:"mediaPresentationDuration,attr"`
    BaseUrl                   string    `xml:"BaseURL"`
    Periods                   []*Period `xml:"Period"`
-   MpdUrl                    *url.URL  `xml:"-"`
+   mpdUrl                    *url.URL
 }
 
-// ResolveBaseUrl resolves the MPD's BaseURL against the MpdUrl.
+// ResolveBaseUrl resolves the MPD's BaseURL against the mpdUrl.
 func (m *Mpd) ResolveBaseUrl() (*url.URL, error) {
-   return resolveRef(m.MpdUrl, m.BaseUrl)
+   return resolveRef(m.mpdUrl, m.BaseUrl)
 }
 
 // GetRepresentations returns a map of all Representations keyed by their Id.
@@ -59,20 +61,8 @@ func (m *Mpd) GetRepresentations() map[string][]*Representation {
    return grouped
 }
 
-// normalizeIds iterates through the MPD and rewrites Representation IDs.
+// normalizeIds iterates through the MPD and rewrites Representation IDs using a 32-bit hash.
 func (m *Mpd) normalizeIds() {
-   reservedIds := make(map[string]bool)
-   for _, manifestPeriod := range m.Periods {
-      for _, currentSet := range manifestPeriod.AdaptationSets {
-         for _, mediaRep := range currentSet.Representations {
-            if mediaRep.requiresOriginalId() {
-               reservedIds[mediaRep.Id] = true
-            }
-         }
-      }
-   }
-   counter := 0
-   patternToId := make(map[string]string)
    for _, manifestPeriod := range m.Periods {
       for _, currentSet := range manifestPeriod.AdaptationSets {
          for _, mediaRep := range currentSet.Representations {
@@ -83,21 +73,13 @@ func (m *Mpd) normalizeIds() {
             if currentTemplate == nil {
                continue
             }
-            pattern := currentTemplate.Media
-            if existingId, ok := patternToId[pattern]; ok {
-               mediaRep.Id = existingId
-               continue
-            }
-            var newId string
-            for {
-               newId = strconv.Itoa(counter)
-               counter++
-               if !reservedIds[newId] {
-                  break
-               }
-            }
-            patternToId[pattern] = newId
-            mediaRep.Id = newId
+
+            // We use FNV-1a (New32a) instead of FNV-1 (New32) because the FNV-1a XOR-then-multiply
+            // approach provides significantly better avalanche properties. This drastically reduces
+            // collisions for DASH Media templates, which often share long identical URL prefixes.
+            hasher := fnv.New32a()
+            fmt.Fprint(hasher, currentTemplate.Media)
+            mediaRep.Id = fmt.Sprintf("%x", hasher.Sum32())
          }
       }
    }
