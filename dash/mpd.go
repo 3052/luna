@@ -2,8 +2,9 @@ package dash
 
 import (
    "encoding/xml"
+   "fmt"
+   "hash/fnv"
    "net/url"
-   "strconv"
 )
 
 func resolveRef(base *url.URL, relStr string) (*url.URL, error) {
@@ -59,20 +60,8 @@ func (m *Mpd) GetRepresentations() map[string][]*Representation {
    return grouped
 }
 
-// normalizeIds iterates through the MPD and rewrites Representation IDs.
+// normalizeIds iterates through the MPD and rewrites Representation IDs using a 32-bit hash.
 func (m *Mpd) normalizeIds() {
-   reservedIds := make(map[string]bool)
-   for _, manifestPeriod := range m.Periods {
-      for _, currentSet := range manifestPeriod.AdaptationSets {
-         for _, mediaRep := range currentSet.Representations {
-            if mediaRep.requiresOriginalId() {
-               reservedIds[mediaRep.Id] = true
-            }
-         }
-      }
-   }
-   counter := 0
-   patternToId := make(map[string]string)
    for _, manifestPeriod := range m.Periods {
       for _, currentSet := range manifestPeriod.AdaptationSets {
          for _, mediaRep := range currentSet.Representations {
@@ -83,21 +72,13 @@ func (m *Mpd) normalizeIds() {
             if currentTemplate == nil {
                continue
             }
-            pattern := currentTemplate.Media
-            if existingId, ok := patternToId[pattern]; ok {
-               mediaRep.Id = existingId
-               continue
-            }
-            var newId string
-            for {
-               newId = strconv.Itoa(counter)
-               counter++
-               if !reservedIds[newId] {
-                  break
-               }
-            }
-            patternToId[pattern] = newId
-            mediaRep.Id = newId
+
+            // We use FNV-1a (New32a) instead of FNV-1 (New32) because the FNV-1a XOR-then-multiply
+            // approach provides significantly better avalanche properties. This drastically reduces
+            // collisions for DASH Media templates, which often share long identical URL prefixes.
+            hasher := fnv.New32a()
+            fmt.Fprint(hasher, currentTemplate.Media)
+            mediaRep.Id = fmt.Sprintf("%x", hasher.Sum32())
          }
       }
    }
