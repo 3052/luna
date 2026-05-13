@@ -9,6 +9,19 @@ import (
    "strings"
 )
 
+func (mp *MasterPlaylist) ResolveUris(base *url.URL) {
+   for _, streamItem := range mp.StreamInfs {
+      if streamItem.Uri != nil {
+         streamItem.Uri = base.ResolveReference(streamItem.Uri)
+      }
+   }
+   for _, mediaItem := range mp.Medias {
+      if mediaItem.Uri != nil {
+         mediaItem.Uri = base.ResolveReference(mediaItem.Uri)
+      }
+   }
+}
+
 // DecodeMaster parses a Master Playlist. If base is provided, it resolves
 // relative URIs
 func DecodeMaster(content string, base *url.URL) (*MasterPlaylist, error) {
@@ -80,18 +93,7 @@ func (s *StreamInf) String() string {
    return data.String()
 }
 
-func (mp *MasterPlaylist) ResolveUris(base *url.URL) {
-   for _, streamItem := range mp.StreamInfs {
-      if streamItem.Uri != nil {
-         streamItem.Uri = base.ResolveReference(streamItem.Uri)
-      }
-   }
-   for _, mediaItem := range mp.Medias {
-      if mediaItem.Uri != nil {
-         mediaItem.Uri = base.ResolveReference(mediaItem.Uri)
-      }
-   }
-}
+///
 
 // generateHashId creates a fast 32-bit hash for the given URL.
 // Using FNV-1a (New32a) over FNV-1 (New32) because it provides better
