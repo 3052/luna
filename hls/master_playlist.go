@@ -9,6 +9,15 @@ import (
    "strings"
 )
 
+// generateHashId creates a fast 32-bit hash for the given URL.
+// Using FNV-1a (New32a) over FNV-1 (New32) because it provides better
+// avalanche characteristics, resulting in fewer collisions for highly similar URLs.
+func generateHashId(u *url.URL) string {
+   hasher := fnv.New32a()
+   fmt.Fprint(hasher, u)
+   return fmt.Sprintf("%x", hasher.Sum32())
+}
+
 func (mp *MasterPlaylist) ResolveUris(base *url.URL) {
    for _, streamItem := range mp.StreamInfs {
       if streamItem.Uri != nil {
@@ -94,15 +103,6 @@ func (s *StreamInf) String() string {
 }
 
 ///
-
-// generateHashId creates a fast 32-bit hash for the given URL.
-// Using FNV-1a (New32a) over FNV-1 (New32) because it provides better
-// avalanche characteristics, resulting in fewer collisions for highly similar URLs.
-func generateHashId(u *url.URL) string {
-   hasher := fnv.New32a()
-   fmt.Fprint(hasher, u)
-   return fmt.Sprintf("%x", hasher.Sum32())
-}
 
 func parseMaster(lines []string) (*MasterPlaylist, error) {
    masterPlaylist := &MasterPlaylist{}
