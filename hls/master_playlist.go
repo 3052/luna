@@ -12,9 +12,9 @@ import (
 // generateHashId creates a fast 32-bit hash for the given URL.
 // Using FNV-1a (New32a) over FNV-1 (New32) because it provides better
 // avalanche characteristics, resulting in fewer collisions for highly similar URLs.
-func generateHashId(u *url.URL) string {
+func generateHashId(address *url.URL) string {
    hasher := fnv.New32a()
-   fmt.Fprint(hasher, u)
+   fmt.Fprint(hasher, address)
    return fmt.Sprintf("%x", hasher.Sum32())
 }
 
