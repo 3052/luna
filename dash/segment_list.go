@@ -34,7 +34,8 @@ type SegmentList struct {
 
 // SegmentUrl defines a specific media segment source.
 type SegmentUrl struct {
-   Media string `xml:"media,attr"`
+   Media      string `xml:"media,attr"`
+   MediaRange string `xml:"mediaRange,attr"` // Add this to capture the byte range
    // Navigation
    Parent *SegmentList `xml:"-"`
 }
