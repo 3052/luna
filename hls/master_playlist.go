@@ -31,6 +31,75 @@ func (mp *MasterPlaylist) ResolveUris(base *url.URL) {
    }
 }
 
+func parseMaster(lines []string) (*MasterPlaylist, error) {
+   masterPlaylist := &MasterPlaylist{}
+   streamMap := make(map[string]*StreamInf) // Map URL to StreamInf to handle grouping
+
+   for i := 0; i < len(lines); i++ {
+      line := lines[i]
+      if strings.HasPrefix(line, "#EXT-X-MEDIA:") {
+         media, err := parseMediaTag(line)
+         if err != nil {
+            return nil, err
+         }
+
+         media.Id = generateHashId(media.Uri)
+         masterPlaylist.Medias = append(masterPlaylist.Medias, media)
+
+      } else if strings.HasPrefix(line, "#EXT-X-STREAM-INF:") {
+         attrs := parseAttributes(line, "#EXT-X-STREAM-INF:")
+
+         if i+1 >= len(lines) { // Malformed, missing URI
+            return nil, fmt.Errorf("malformed EXT-X-STREAM-INF: missing URI")
+         }
+         i++
+         uriLine := lines[i]
+
+         stream, exists := streamMap[uriLine]
+         if !exists {
+            parsedUrl, err := url.Parse(uriLine)
+            if err != nil {
+               return nil, fmt.Errorf("invalid URI in EXT-X-STREAM-INF: %w", err)
+            }
+
+            // First time seeing this URI, create a new StreamInf
+            stream = &StreamInf{
+               Id:  generateHashId(parsedUrl),
+               Uri: parsedUrl,
+            }
+
+            streamMap[uriLine] = stream
+            masterPlaylist.StreamInfs = append(masterPlaylist.StreamInfs, stream)
+
+            // This is the first so it's automatically the lowest bandwidth; populate all fields
+            if err := populateStreamInfAttributes(stream, attrs); err != nil {
+               return nil, err
+            }
+         }
+
+         // Always add the AUDIO group from the current tag to the list.
+         if audioGroup := attrs["AUDIO"]; audioGroup != "" {
+            stream.Audio = append(stream.Audio, audioGroup)
+         }
+
+         // Check if this variant has a lower bandwidth than the one stored.
+         // If so, update the stream's primary attributes.
+         if bwStr := attrs["BANDWIDTH"]; bwStr != "" {
+            bw, err := strconv.Atoi(bwStr)
+            if err != nil {
+               return nil, fmt.Errorf("invalid BANDWIDTH in EXT-X-STREAM-INF: %w", err)
+            }
+            if exists && bw < stream.Bandwidth {
+               if err := populateStreamInfAttributes(stream, attrs); err != nil {
+                  return nil, err
+               }
+            }
+         }
+      }
+   }
+   return masterPlaylist, nil
+}
+
 // DecodeMaster parses a Master Playlist. If base is provided, it resolves
 // relative URIs
 func DecodeMaster(content string, base *url.URL) (*MasterPlaylist, error) {
@@ -103,75 +172,6 @@ func (s *StreamInf) String() string {
 }
 
 ///
-
-func parseMaster(lines []string) (*MasterPlaylist, error) {
-   masterPlaylist := &MasterPlaylist{}
-   streamMap := make(map[string]*StreamInf) // Map URL to StreamInf to handle grouping
-
-   for i := 0; i < len(lines); i++ {
-      line := lines[i]
-      if strings.HasPrefix(line, "#EXT-X-MEDIA:") {
-         media, err := parseMediaTag(line)
-         if err != nil {
-            return nil, err
-         }
-
-         media.Id = generateHashId(media.Uri)
-         masterPlaylist.Medias = append(masterPlaylist.Medias, media)
-
-      } else if strings.HasPrefix(line, "#EXT-X-STREAM-INF:") {
-         attrs := parseAttributes(line, "#EXT-X-STREAM-INF:")
-
-         if i+1 >= len(lines) { // Malformed, missing URI
-            return nil, fmt.Errorf("malformed EXT-X-STREAM-INF: missing URI")
-         }
-         i++
-         uriLine := lines[i]
-
-         stream, exists := streamMap[uriLine]
-         if !exists {
-            parsedUrl, err := url.Parse(uriLine)
-            if err != nil {
-               return nil, fmt.Errorf("invalid URI in EXT-X-STREAM-INF: %w", err)
-            }
-
-            // First time seeing this URI, create a new StreamInf
-            stream = &StreamInf{
-               Id:  generateHashId(parsedUrl),
-               Uri: parsedUrl,
-            }
-
-            streamMap[uriLine] = stream
-            masterPlaylist.StreamInfs = append(masterPlaylist.StreamInfs, stream)
-
-            // This is the first so it's automatically the lowest bandwidth; populate all fields
-            if err := populateStreamInfAttributes(stream, attrs); err != nil {
-               return nil, err
-            }
-         }
-
-         // Always add the AUDIO group from the current tag to the list.
-         if audioGroup := attrs["AUDIO"]; audioGroup != "" {
-            stream.Audio = append(stream.Audio, audioGroup)
-         }
-
-         // Check if this variant has a lower bandwidth than the one stored.
-         // If so, update the stream's primary attributes.
-         if bwStr := attrs["BANDWIDTH"]; bwStr != "" {
-            bw, err := strconv.Atoi(bwStr)
-            if err != nil {
-               return nil, fmt.Errorf("invalid BANDWIDTH in EXT-X-STREAM-INF: %w", err)
-            }
-            if exists && bw < stream.Bandwidth {
-               if err := populateStreamInfAttributes(stream, attrs); err != nil {
-                  return nil, err
-               }
-            }
-         }
-      }
-   }
-   return masterPlaylist, nil
-}
 
 // populateStreamInfAttributes updates a StreamInf's fields from a map of attributes.
 func populateStreamInfAttributes(stream *StreamInf, attrs map[string]string) error {
