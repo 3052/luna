@@ -9,6 +9,31 @@ import (
    "strings"
 )
 
+// populateStreamInfAttributes updates a StreamInf's fields from a map of attributes.
+func populateStreamInfAttributes(stream *StreamInf, attrs map[string]string) error {
+   stream.Codecs = attrs["CODECS"]
+   stream.Resolution = attrs["RESOLUTION"]
+   stream.FrameRate = attrs["FRAME-RATE"]
+   stream.Subtitles = attrs["SUBTITLES"]
+
+   if val := attrs["BANDWIDTH"]; val != "" {
+      bw, err := strconv.Atoi(val)
+      if err != nil {
+         return fmt.Errorf("invalid BANDWIDTH: %w", err)
+      }
+      stream.Bandwidth = bw
+   }
+
+   if val := attrs["AVERAGE-BANDWIDTH"]; val != "" {
+      abw, err := strconv.Atoi(val)
+      if err != nil {
+         return fmt.Errorf("invalid AVERAGE-BANDWIDTH: %w", err)
+      }
+      stream.AverageBandwidth = abw
+   }
+   return nil
+}
+
 // generateHashId creates a fast 32-bit hash for the given URL.
 // Using FNV-1a (New32a) over FNV-1 (New32) because it provides better
 // avalanche characteristics, resulting in fewer collisions for highly similar URLs.
@@ -172,31 +197,6 @@ func (s *StreamInf) String() string {
 }
 
 ///
-
-// populateStreamInfAttributes updates a StreamInf's fields from a map of attributes.
-func populateStreamInfAttributes(stream *StreamInf, attrs map[string]string) error {
-   stream.Codecs = attrs["CODECS"]
-   stream.Resolution = attrs["RESOLUTION"]
-   stream.FrameRate = attrs["FRAME-RATE"]
-   stream.Subtitles = attrs["SUBTITLES"]
-
-   if val := attrs["BANDWIDTH"]; val != "" {
-      bw, err := strconv.Atoi(val)
-      if err != nil {
-         return fmt.Errorf("invalid BANDWIDTH: %w", err)
-      }
-      stream.Bandwidth = bw
-   }
-
-   if val := attrs["AVERAGE-BANDWIDTH"]; val != "" {
-      abw, err := strconv.Atoi(val)
-      if err != nil {
-         return fmt.Errorf("invalid AVERAGE-BANDWIDTH: %w", err)
-      }
-      stream.AverageBandwidth = abw
-   }
-   return nil
-}
 
 type MasterPlaylist struct {
    Medias     []*Media
