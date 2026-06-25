@@ -7,12 +7,6 @@ import (
    "strings"
 )
 
-// DecodeMedia parses a Media Playlist.
-func DecodeMedia(content string) (*MediaPlaylist, error) {
-   lines := splitLines(content)
-   return parseMedia(lines)
-}
-
 type MediaPlaylist struct {
    TargetDuration int
    MediaSequence  int
@@ -24,29 +18,10 @@ type MediaPlaylist struct {
    EndList        bool
 }
 
-func (mp *MediaPlaylist) ResolveUris(base *url.URL) {
-   for _, keyItem := range mp.Keys {
-      keyItem.resolve(base)
-   }
-   for _, segmentItem := range mp.Segments {
-      segmentItem.resolve(base)
-   }
-   if mp.Map != nil {
-      mp.Map = base.ResolveReference(mp.Map)
-   }
-}
-
-type Segment struct {
-   Uri      *url.URL
-   Duration float64
-   Title    string
-}
-
-// resolve updates the Segment's URI to be absolute.
-func (s *Segment) resolve(base *url.URL) {
-   if s.Uri != nil {
-      s.Uri = base.ResolveReference(s.Uri)
-   }
+// DecodeMedia parses a Media Playlist.
+func DecodeMedia(content string) (*MediaPlaylist, error) {
+   lines := splitLines(content)
+   return parseMedia(lines)
 }
 
 func parseMedia(lines []string) (*MediaPlaylist, error) {
@@ -121,4 +96,29 @@ func parseMedia(lines []string) (*MediaPlaylist, error) {
       }
    }
    return mediaPlaylist, nil
+}
+
+func (mp *MediaPlaylist) ResolveUris(base *url.URL) {
+   for _, keyItem := range mp.Keys {
+      keyItem.resolve(base)
+   }
+   for _, segmentItem := range mp.Segments {
+      segmentItem.resolve(base)
+   }
+   if mp.Map != nil {
+      mp.Map = base.ResolveReference(mp.Map)
+   }
+}
+
+type Segment struct {
+   Uri      *url.URL
+   Duration float64
+   Title    string
+}
+
+// resolve updates the Segment's URI to be absolute.
+func (s *Segment) resolve(base *url.URL) {
+   if s.Uri != nil {
+      s.Uri = base.ResolveReference(s.Uri)
+   }
 }

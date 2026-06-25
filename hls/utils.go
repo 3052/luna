@@ -2,14 +2,6 @@ package hls
 
 import "strings"
 
-// Helper to split lines, ignoring empty lines and carriage returns,
-// but preserving leading/trailing spaces.
-func splitLines(content string) []string {
-   return strings.FieldsFunc(content, func(r rune) bool {
-      return r == '\n' || r == '\r'
-   })
-}
-
 // parseAttributes parses HLS attribute lists (e.g., KEY="VAL",KEY2=VAL).
 // It handles quoted strings containing commas.
 func parseAttributes(line string, tagPrefix string) map[string]string {
@@ -60,4 +52,12 @@ func parseAttributes(line string, tagPrefix string) map[string]string {
    }
 
    return attributes
+}
+
+// Helper to split lines, ignoring empty lines and carriage returns,
+// but preserving leading/trailing spaces.
+func splitLines(content string) []string {
+   return strings.FieldsFunc(content, func(r rune) bool {
+      return r == '\n' || r == '\r'
+   })
 }

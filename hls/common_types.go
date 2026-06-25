@@ -17,10 +17,23 @@ type Key struct {
    Characteristics   string
 }
 
-func (k *Key) resolve(base *url.URL) {
-   if k.Uri != nil {
-      k.Uri = base.ResolveReference(k.Uri)
+func parseKey(line string) (*Key, error) {
+   prefix := "#EXT-X-KEY:"
+   attrs := parseAttributes(line, prefix)
+   newKey := &Key{
+      Method:            attrs["METHOD"],
+      KeyFormat:         attrs["KEYFORMAT"],
+      KeyFormatVersions: attrs["KEYFORMATVERSIONS"],
+      Characteristics:   attrs["CHARACTERISTICS"],
    }
+   if value, ok := attrs["URI"]; ok && value != "" {
+      parsedUrl, err := url.Parse(value)
+      if err != nil {
+         return nil, fmt.Errorf("invalid URI in EXT-X-KEY: %w", err)
+      }
+      newKey.Uri = parsedUrl
+   }
+   return newKey, nil
 }
 
 // DecodeData extracts and decodes the Base64 data directly from the URL Opaque field.
@@ -44,21 +57,8 @@ func (k *Key) DecodeData() ([]byte, error) {
    return base64.StdEncoding.DecodeString(dataString)
 }
 
-func parseKey(line string) (*Key, error) {
-   prefix := "#EXT-X-KEY:"
-   attrs := parseAttributes(line, prefix)
-   newKey := &Key{
-      Method:            attrs["METHOD"],
-      KeyFormat:         attrs["KEYFORMAT"],
-      KeyFormatVersions: attrs["KEYFORMATVERSIONS"],
-      Characteristics:   attrs["CHARACTERISTICS"],
+func (k *Key) resolve(base *url.URL) {
+   if k.Uri != nil {
+      k.Uri = base.ResolveReference(k.Uri)
    }
-   if value, ok := attrs["URI"]; ok && value != "" {
-      parsedUrl, err := url.Parse(value)
-      if err != nil {
-         return nil, fmt.Errorf("invalid URI in EXT-X-KEY: %w", err)
-      }
-      newKey.Uri = parsedUrl
-   }
-   return newKey, nil
 }

@@ -9,6 +9,26 @@ import (
    "strings"
 )
 
+func Bandwidth(s1, s2 *StreamInf) int {
+   return cmp.Or(
+      s1.AverageBandwidth-s2.AverageBandwidth,
+      s1.Bandwidth-s2.Bandwidth,
+   )
+}
+
+func GroupId(m1, m2 *Media) int {
+   return cmp.Compare(m1.GroupId, m2.GroupId)
+}
+
+// generateHashId creates a fast 32-bit hash for the given URL.
+// Using FNV-1a (New32a) over FNV-1 (New32) because it provides better
+// avalanche characteristics, resulting in fewer collisions for highly similar URLs.
+func generateHashId(address *url.URL) string {
+   hasher := fnv.New32a()
+   fmt.Fprint(hasher, address)
+   return fmt.Sprintf("%x", hasher.Sum32())
+}
+
 // populateStreamInfAttributes updates a StreamInf's fields from a map of attributes.
 func populateStreamInfAttributes(stream *StreamInf, attrs map[string]string) error {
    stream.Codecs = attrs["CODECS"]
@@ -34,26 +54,27 @@ func populateStreamInfAttributes(stream *StreamInf, attrs map[string]string) err
    return nil
 }
 
-// generateHashId creates a fast 32-bit hash for the given URL.
-// Using FNV-1a (New32a) over FNV-1 (New32) because it provides better
-// avalanche characteristics, resulting in fewer collisions for highly similar URLs.
-func generateHashId(address *url.URL) string {
-   hasher := fnv.New32a()
-   fmt.Fprint(hasher, address)
-   return fmt.Sprintf("%x", hasher.Sum32())
+///
+
+type MasterPlaylist struct {
+   Medias     []*Media
+   StreamInfs []*StreamInf
 }
 
-func (mp *MasterPlaylist) ResolveUris(base *url.URL) {
-   for _, streamItem := range mp.StreamInfs {
-      if streamItem.Uri != nil {
-         streamItem.Uri = base.ResolveReference(streamItem.Uri)
-      }
+// DecodeMaster parses a Master Playlist. If base is provided, it resolves
+// relative URIs
+func DecodeMaster(content string, base *url.URL) (*MasterPlaylist, error) {
+   lines := splitLines(content)
+   master, err := parseMaster(lines)
+   if err != nil {
+      return nil, err
    }
-   for _, mediaItem := range mp.Medias {
-      if mediaItem.Uri != nil {
-         mediaItem.Uri = base.ResolveReference(mediaItem.Uri)
-      }
+
+   if base != nil {
+      master.ResolveUris(base)
    }
+
+   return master, nil
 }
 
 func parseMaster(lines []string) (*MasterPlaylist, error) {
@@ -125,20 +146,29 @@ func parseMaster(lines []string) (*MasterPlaylist, error) {
    return masterPlaylist, nil
 }
 
-// DecodeMaster parses a Master Playlist. If base is provided, it resolves
-// relative URIs
-func DecodeMaster(content string, base *url.URL) (*MasterPlaylist, error) {
-   lines := splitLines(content)
-   master, err := parseMaster(lines)
-   if err != nil {
-      return nil, err
+func (mp *MasterPlaylist) ResolveUris(base *url.URL) {
+   for _, streamItem := range mp.StreamInfs {
+      if streamItem.Uri != nil {
+         streamItem.Uri = base.ResolveReference(streamItem.Uri)
+      }
    }
-
-   if base != nil {
-      master.ResolveUris(base)
+   for _, mediaItem := range mp.Medias {
+      if mediaItem.Uri != nil {
+         mediaItem.Uri = base.ResolveReference(mediaItem.Uri)
+      }
    }
+}
 
-   return master, nil
+// Media represents an #EXT-X-MEDIA tag.
+type Media struct {
+   AutoSelect bool
+   Channels   string
+   GroupId    string
+   Id         string
+   Language   string
+   Name       string
+   Type       string
+   Uri        *url.URL
 }
 
 func parseMediaTag(line string) (*Media, error) {
@@ -178,6 +208,21 @@ func (m *Media) String() string {
    return data.String()
 }
 
+// StreamInf represents a single media playlist (URI) from a #EXT-X-STREAM-INF tag.
+// It aggregates information from all tags that point to the same URI. The primary
+// attributes are taken from the variant with the lowest bandwidth.
+type StreamInf struct {
+   Audio            []string // A list of associated audio Media GROUP-IDs
+   AverageBandwidth int
+   Bandwidth        int
+   Codecs           string
+   FrameRate        string
+   Id               string
+   Resolution       string
+   Subtitles        string // Refers to a Media GROUP-ID for subtitles
+   Uri              *url.URL
+}
+
 // String returns a multi-line summary of the StreamInf.
 func (s *StreamInf) String() string {
    data := &strings.Builder{}
@@ -194,49 +239,4 @@ func (s *StreamInf) String() string {
    }
    fmt.Fprint(data, "id: ", s.Id)
    return data.String()
-}
-
-///
-
-type MasterPlaylist struct {
-   Medias     []*Media
-   StreamInfs []*StreamInf
-}
-
-// Media represents an #EXT-X-MEDIA tag.
-type Media struct {
-   AutoSelect bool
-   Channels   string
-   GroupId    string
-   Id         string
-   Language   string
-   Name       string
-   Type       string
-   Uri        *url.URL
-}
-
-// StreamInf represents a single media playlist (URI) from a #EXT-X-STREAM-INF tag.
-// It aggregates information from all tags that point to the same URI. The primary
-// attributes are taken from the variant with the lowest bandwidth.
-type StreamInf struct {
-   Audio            []string // A list of associated audio Media GROUP-IDs
-   AverageBandwidth int
-   Bandwidth        int
-   Codecs           string
-   FrameRate        string
-   Id               string
-   Resolution       string
-   Subtitles        string // Refers to a Media GROUP-ID for subtitles
-   Uri              *url.URL
-}
-
-func Bandwidth(s1, s2 *StreamInf) int {
-   return cmp.Or(
-      s1.AverageBandwidth-s2.AverageBandwidth,
-      s1.Bandwidth-s2.Bandwidth,
-   )
-}
-
-func GroupId(m1, m2 *Media) int {
-   return cmp.Compare(m1.GroupId, m2.GroupId)
 }

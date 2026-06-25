@@ -21,6 +21,14 @@ func resolveRef(base *url.URL, relStr string) (*url.URL, error) {
    return base.ResolveReference(rel), nil
 }
 
+// Mpd represents the root element of the DASH MPD file.
+type Mpd struct {
+   MediaPresentationDuration string    `xml:"mediaPresentationDuration,attr"`
+   BaseUrl                   string    `xml:"BaseURL"`
+   Periods                   []*Period `xml:"Period"`
+   mpdUrl                    *url.URL
+}
+
 // Parse takes a byte slice of an MPD file, unmarshals it,
 // links navigation parents, and normalizes Representation IDs.
 func Parse(data []byte, mpdUrl *url.URL) (*Mpd, error) {
@@ -35,19 +43,6 @@ func Parse(data []byte, mpdUrl *url.URL) (*Mpd, error) {
    return &manifest, nil
 }
 
-// Mpd represents the root element of the DASH MPD file.
-type Mpd struct {
-   MediaPresentationDuration string    `xml:"mediaPresentationDuration,attr"`
-   BaseUrl                   string    `xml:"BaseURL"`
-   Periods                   []*Period `xml:"Period"`
-   mpdUrl                    *url.URL
-}
-
-// ResolveBaseUrl resolves the MPD's BaseURL against the mpdUrl.
-func (m *Mpd) ResolveBaseUrl() (*url.URL, error) {
-   return resolveRef(m.mpdUrl, m.BaseUrl)
-}
-
 // GetRepresentations returns a map of all Representations keyed by their Id.
 func (m *Mpd) GetRepresentations() map[string][]*Representation {
    grouped := make(map[string][]*Representation)
@@ -59,6 +54,18 @@ func (m *Mpd) GetRepresentations() map[string][]*Representation {
       }
    }
    return grouped
+}
+
+// ResolveBaseUrl resolves the MPD's BaseURL against the mpdUrl.
+func (m *Mpd) ResolveBaseUrl() (*url.URL, error) {
+   return resolveRef(m.mpdUrl, m.BaseUrl)
+}
+
+func (m *Mpd) link() {
+   for _, manifestPeriod := range m.Periods {
+      manifestPeriod.Parent = m
+      manifestPeriod.link()
+   }
 }
 
 // normalizeIds iterates through the MPD and rewrites Representation IDs using a 32-bit hash.
@@ -82,12 +89,5 @@ func (m *Mpd) normalizeIds() {
             mediaRep.Id = fmt.Sprintf("%x", hasher.Sum32())
          }
       }
-   }
-}
-
-func (m *Mpd) link() {
-   for _, manifestPeriod := range m.Periods {
-      manifestPeriod.Parent = m
-      manifestPeriod.link()
    }
 }
