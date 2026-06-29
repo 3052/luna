@@ -54,8 +54,6 @@ func populateStreamInfAttributes(stream *StreamInf, attrs map[string]string) err
    return nil
 }
 
-///
-
 type MasterPlaylist struct {
    Medias     []*Media
    StreamInfs []*StreamInf
