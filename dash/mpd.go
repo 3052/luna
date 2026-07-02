@@ -44,11 +44,21 @@ func Parse(data []byte, mpdUrl *url.URL) (*Mpd, error) {
 }
 
 // GetRepresentations returns a map of all Representations keyed by their Id.
+// It automatically deduplicates identical Representations within the same Period.
 func (m *Mpd) GetRepresentations() map[string][]*Representation {
    grouped := make(map[string][]*Representation)
    for _, manifestPeriod := range m.Periods {
       for _, currentSet := range manifestPeriod.AdaptationSets {
          for _, mediaRep := range currentSet.Representations {
+
+            reps := grouped[mediaRep.Id]
+
+            // If the last added representation belongs to the current Period,
+            // we've already captured this track for this period. Skip the duplicate.
+            if len(reps) > 0 && reps[len(reps)-1].Parent.Parent == manifestPeriod {
+               continue
+            }
+
             grouped[mediaRep.Id] = append(grouped[mediaRep.Id], mediaRep)
          }
       }
