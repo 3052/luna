@@ -1,3 +1,4 @@
+// media_playlist.go
 package hls
 
 import (

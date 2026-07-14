@@ -1,3 +1,4 @@
+// master_playlist.go
 package hls
 
 import (

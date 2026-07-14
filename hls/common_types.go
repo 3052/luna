@@ -1,3 +1,4 @@
+// common_types.go
 package hls
 
 import (

@@ -1,3 +1,4 @@
+// utils.go
 package hls
 
 import "strings"
