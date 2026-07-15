@@ -81,17 +81,25 @@ func parseMedia(lines []string) (*MediaPlaylist, error) {
             Duration: duration,
             Title:    strings.TrimSpace(title),
          }
-         // The URI is on the next line
-         if i+1 < len(lines) {
-            nextLine := lines[i+1]
-            if !strings.HasPrefix(nextLine, "#") && nextLine != "" {
+         // The URI may not be on the immediately following line; intermediate
+         // tags such as #EXT-X-BYTERANGE are allowed between #EXTINF and the
+         // segment URI. Scan forward, consuming any intervening tags, until
+         // we find the (non-comment) segment URI line.
+         for j := i + 1; j < len(lines); j++ {
+            nextLine := lines[j]
+            if strings.HasPrefix(nextLine, "#") {
+               // Skip comments and other tags (e.g. #EXT-X-BYTERANGE).
+               continue
+            }
+            if nextLine != "" {
                parsedUrl, err := url.Parse(nextLine)
                if err != nil {
                   return nil, fmt.Errorf("invalid segment URI: %w", err)
                }
                newSegment.Uri = parsedUrl
-               i++
+               i = j // advance outer loop past consumed lines
             }
+            break
          }
          mediaPlaylist.Segments = append(mediaPlaylist.Segments, newSegment)
       }
