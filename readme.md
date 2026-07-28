@@ -3,7 +3,8 @@
 > Some things are hidden for a reason, and if you see them, you'll be changed
 > forever, but I **wanted** to be changed forever.
 >
-> [Miranda July](//youtube.com/watch?v=7dMGWporaFE&t=142s)
+> Miranda July (2023)
+> https://youtube.com/watch?v=7dMGWporaFE&t=142s
 
 parser for HLS and DASH media manifests
 
