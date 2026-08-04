@@ -174,3 +174,5 @@ func (r *Representation) requiresOriginalId() bool {
    }
    return strings.Contains(currentTemplate.Media, "$RepresentationID$")
 }
+
+// representation.go

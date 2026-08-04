@@ -101,3 +101,5 @@ func (m *Mpd) normalizeIds() {
       }
    }
 }
+
+// mpd.go

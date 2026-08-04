@@ -16,3 +16,5 @@ func (cp *ContentProtection) GetPssh() ([]byte, error) {
    }
    return base64.StdEncoding.DecodeString(cp.Pssh)
 }
+
+// content_protection.go

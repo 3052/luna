@@ -48,3 +48,5 @@ func (su *SegmentUrl) ResolveMedia() (*url.URL, error) {
    }
    return resolveRef(base, su.Media)
 }
+
+// segment_list.go
