@@ -1,4 +1,3 @@
-// master_playlist.go
 package hls
 
 import (
@@ -239,3 +238,5 @@ func (s *StreamInf) String() string {
    fmt.Fprint(data, "id: ", s.Id)
    return data.String()
 }
+
+// master_playlist.go

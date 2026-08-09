@@ -1,4 +1,3 @@
-// media_playlist.go
 package hls
 
 import (
@@ -131,3 +130,5 @@ func (s *Segment) resolve(base *url.URL) {
       s.Uri = base.ResolveReference(s.Uri)
    }
 }
+
+// media_playlist.go

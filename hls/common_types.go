@@ -1,4 +1,3 @@
-// common_types.go
 package hls
 
 import (
@@ -63,3 +62,5 @@ func (k *Key) resolve(base *url.URL) {
       k.Uri = base.ResolveReference(k.Uri)
    }
 }
+
+// common_types.go

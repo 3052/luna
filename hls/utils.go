@@ -1,4 +1,3 @@
-// utils.go
 package hls
 
 import "strings"
@@ -62,3 +61,5 @@ func splitLines(content string) []string {
       return r == '\n' || r == '\r'
    })
 }
+
+// utils.go
