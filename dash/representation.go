@@ -11,15 +11,15 @@ type Representation struct {
    Bandwidth         int                  `xml:"bandwidth,attr"`
    BaseUrl           string               `xml:"BaseURL"`
    Codecs            string               `xml:"codecs,attr"`
-   ContentProtection []*ContentProtection `xml:"ContentProtection"`
    Height            int                  `xml:"height,attr"`
    Id                string               `xml:"id,attr"`
    MimeType          string               `xml:"mimeType,attr"`
    Parent            *AdaptationSet       `xml:"-"`
-   SegmentBase       *SegmentBase         `xml:"SegmentBase"`
    SegmentList       *SegmentList         `xml:"SegmentList"`
    SegmentTemplate   *SegmentTemplate     `xml:"SegmentTemplate"`
    Width             int                  `xml:"width,attr"`
+   SegmentBase       *SegmentBase         `xml:"SegmentBase"`
+   ContentProtection []*ContentProtection `xml:"ContentProtection"`
 }
 
 func (r *Representation) GetCodecs() string {
