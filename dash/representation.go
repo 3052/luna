@@ -14,12 +14,12 @@ type Representation struct {
    Height            int                  `xml:"height,attr"`
    Id                string               `xml:"id,attr"`
    MimeType          string               `xml:"mimeType,attr"`
-   Parent            *AdaptationSet       `xml:"-"`
    SegmentList       *SegmentList         `xml:"SegmentList"`
    SegmentTemplate   *SegmentTemplate     `xml:"SegmentTemplate"`
    Width             int                  `xml:"width,attr"`
    SegmentBase       *SegmentBase         `xml:"SegmentBase"`
    ContentProtection []*ContentProtection `xml:"ContentProtection"`
+   Parent            *AdaptationSet       `xml:"-"`
 }
 
 func (r *Representation) GetCodecs() string {

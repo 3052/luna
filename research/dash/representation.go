@@ -1,11 +1,14 @@
 package dash
 
-import "slices"
+import (
+   "net/url"
+   "slices"
+)
 
 // medianBandwidth returns the median bandwidth; even count averages the
 // two middle values, rounded down.
-func medianBandwidth(reps []Representation) uint32 {
-   vals := make([]uint32, len(reps))
+func medianBandwidth(reps []Representation) uint64 {
+   vals := make([]uint64, len(reps))
    for i, r := range reps {
       vals[i] = r.Bandwidth
    }
@@ -14,7 +17,22 @@ func medianBandwidth(reps []Representation) uint32 {
    if n%2 == 1 {
       return vals[n/2]
    }
-   return uint32((uint64(vals[n/2-1]) + uint64(vals[n/2])) / 2)
+   return (vals[n/2-1] + vals[n/2]) / 2
+}
+
+// resolveURL resolves the URL reference ref against base using
+// (*url.URL).Parse. If base is nil, ref is returned unchanged; an
+// already-absolute ref passes through, and a relative ref is resolved
+// per RFC 3986.
+func resolveURL(base *url.URL, ref string) (string, error) {
+   if base == nil || ref == "" {
+      return ref, nil
+   }
+   u, err := base.Parse(ref)
+   if err != nil {
+      return "", err
+   }
+   return u.String(), nil
 }
 
 // BaseURL is a media URL for single-file addressing.
@@ -40,7 +58,7 @@ type Representation struct {
    // "text/vtt", "image/jpeg").
    MimeType string `xml:"mimeType,attr"`
    // Bandwidth is the peak bandwidth in bits per second.
-   Bandwidth uint32 `xml:"bandwidth,attr"`
+   Bandwidth uint64 `xml:"bandwidth,attr"`
 
    // Width / Height are the video dimensions.
    Width  uint32 `xml:"width,attr"`
@@ -56,6 +74,16 @@ type Representation struct {
    SegmentBase *SegmentBase `xml:"SegmentBase"`
    // SegmentTemplate describes template-based multi-segment addressing.
    SegmentTemplate *SegmentTemplate `xml:"SegmentTemplate"`
+}
+
+// URL returns the absolute URL of the representation's media resource,
+// resolved against base. If base is nil, or the representation has no
+// BaseURL, the reference is returned as-is (empty if absent).
+func (r *Representation) URL(base *url.URL) (string, error) {
+   if r.BaseURL == nil {
+      return "", nil
+   }
+   return resolveURL(base, r.BaseURL.URL)
 }
 
 // SegmentBase describes byte-range addressing of a single media file.
@@ -91,6 +119,14 @@ type SegmentTemplate struct {
    // SegmentTimeline lists explicit segment timing entries, used when
    // segments have non-uniform durations.
    SegmentTimeline *SegmentTimeline `xml:"SegmentTimeline"`
+}
+
+// URL returns the absolute URL of the segment media template, resolved
+// against base. If base is nil, the template is returned as-is.
+// Template identifiers such as $Number$ are left intact for the caller
+// to substitute.
+func (st *SegmentTemplate) URL(base *url.URL) (string, error) {
+   return resolveURL(base, st.Media)
 }
 
 // SegmentTimeline is a list of explicit segment timing entries.
