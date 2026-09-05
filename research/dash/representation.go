@@ -1,34 +1,6 @@
 package dash
 
-import (
-   "fmt"
-   "sort"
-)
-
-// checkPresence errors if the two values differ in nil-ness.
-func checkPresence[T any](id, field string, first, other *T) error {
-   if (first == nil) != (other == nil) {
-      return conflictErr(id, field+" presence", first != nil, other != nil)
-   }
-   return nil
-}
-
-// conflictErr builds a conflict error for one representation ID.
-func conflictErr(id, field string, first, other any) error {
-   return fmt.Errorf("dash: representation %q: conflicting %s: %v vs %v", id, field, first, other)
-}
-
-// firstValue returns the first observed value of a field, or an error if
-// any occurrence carries a different value.
-func firstValue[T comparable](id string, reps []Representation, field string, get func(Representation) T) (T, error) {
-   first := get(reps[0])
-   for _, r := range reps[1:] {
-      if v := get(r); v != first {
-         return first, conflictErr(id, field, first, v)
-      }
-   }
-   return first, nil
-}
+import "slices"
 
 // medianBandwidth returns the median bandwidth; even count averages the
 // two middle values, rounded down.
@@ -37,22 +9,12 @@ func medianBandwidth(reps []Representation) uint32 {
    for i, r := range reps {
       vals[i] = r.Bandwidth
    }
-   sort.Slice(vals, func(i, j int) bool { return vals[i] < vals[j] })
+   slices.Sort(vals)
    n := len(vals)
    if n%2 == 1 {
       return vals[n/2]
    }
    return uint32((uint64(vals[n/2-1]) + uint64(vals[n/2])) / 2)
-}
-
-// AudioChannelConfiguration describes the channel layout of audio content.
-type AudioChannelConfiguration struct {
-   // SchemeIDURI identifies the channel configuration scheme
-   // (e.g. "urn:mpeg:mpegB:cicp:ChannelConfiguration" or
-   // "urn:mpeg:dash:23003:3:audio_channel_configuration:2011").
-   SchemeIDURI string `xml:"schemeIdUri,attr"`
-   // Value is the number of channels (e.g. "6", "2").
-   Value string `xml:"value,attr"`
 }
 
 // BaseURL is a media URL for single-file addressing.
@@ -90,8 +52,6 @@ type Representation struct {
 
    // BaseURL points to the media resource (single-file addressing).
    BaseURL *BaseURL `xml:"BaseURL"`
-   // AudioChannelConfiguration describes the audio channel layout.
-   AudioChannelConfiguration *AudioChannelConfiguration `xml:"AudioChannelConfiguration"`
    // SegmentBase describes byte-range addressing for a single file.
    SegmentBase *SegmentBase `xml:"SegmentBase"`
    // SegmentTemplate describes template-based multi-segment addressing.
