@@ -82,13 +82,6 @@ type ContentProtection struct {
    PSSH string `xml:"cenc:pssh"`
 }
 
-// EssentialProperty carries information the client must understand
-// to process the content (e.g. thumbnail tile layout "1x1").
-type EssentialProperty struct {
-   SchemeIDURI string `xml:"schemeIdUri,attr"`
-   Value       string `xml:"value,attr"`
-}
-
 // Label is a human-readable label for an adaptation set.
 type Label struct {
    // Text is the label content (e.g. "en-US CC").

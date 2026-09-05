@@ -1,5 +1,50 @@
 package dash
 
+import (
+   "fmt"
+   "sort"
+)
+
+// checkPresence errors if the two values differ in nil-ness.
+func checkPresence[T any](id, field string, first, other *T) error {
+   if (first == nil) != (other == nil) {
+      return conflictErr(id, field+" presence", first != nil, other != nil)
+   }
+   return nil
+}
+
+// conflictErr builds a conflict error for one representation ID.
+func conflictErr(id, field string, first, other any) error {
+   return fmt.Errorf("dash: representation %q: conflicting %s: %v vs %v", id, field, first, other)
+}
+
+// firstValue returns the first observed value of a field, or an error if
+// any occurrence carries a different value.
+func firstValue[T comparable](id string, reps []Representation, field string, get func(Representation) T) (T, error) {
+   first := get(reps[0])
+   for _, r := range reps[1:] {
+      if v := get(r); v != first {
+         return first, conflictErr(id, field, first, v)
+      }
+   }
+   return first, nil
+}
+
+// medianBandwidth returns the median bandwidth; even count averages the
+// two middle values, rounded down.
+func medianBandwidth(reps []Representation) uint32 {
+   vals := make([]uint32, len(reps))
+   for i, r := range reps {
+      vals[i] = r.Bandwidth
+   }
+   sort.Slice(vals, func(i, j int) bool { return vals[i] < vals[j] })
+   n := len(vals)
+   if n%2 == 1 {
+      return vals[n/2]
+   }
+   return uint32((uint64(vals[n/2-1]) + uint64(vals[n/2])) / 2)
+}
+
 // AudioChannelConfiguration describes the channel layout of audio content.
 type AudioChannelConfiguration struct {
    // SchemeIDURI identifies the channel configuration scheme
@@ -51,9 +96,6 @@ type Representation struct {
    SegmentBase *SegmentBase `xml:"SegmentBase"`
    // SegmentTemplate describes template-based multi-segment addressing.
    SegmentTemplate *SegmentTemplate `xml:"SegmentTemplate"`
-   // EssentialProperties carry information required to process the
-   // representation (e.g. thumbnail tile layout).
-   EssentialProperties []EssentialProperty `xml:"EssentialProperty"`
 }
 
 // SegmentBase describes byte-range addressing of a single media file.

@@ -1,56 +1,5 @@
 package dash
 
-import (
-   "fmt"
-   "sort"
-)
-
-// conflictErr builds a conflict error for one representation ID.
-func conflictErr(id, field string, first, other any) error {
-   return fmt.Errorf("dash: representation %q: conflicting %s: %v vs %v", id, field, first, other)
-}
-
-// equalEssentialProperties reports whether two EssentialProperty lists
-// are identical, including order.
-func equalEssentialProperties(a, b []EssentialProperty) bool {
-   if len(a) != len(b) {
-      return false
-   }
-   for i := range a {
-      if a[i] != b[i] {
-         return false
-      }
-   }
-   return true
-}
-
-// firstValue returns the first observed value of a field, or an error
-// if any occurrence carries a different value.
-func firstValue[T comparable](id string, reps []Representation, field string, get func(Representation) T) (T, error) {
-   first := get(reps[0])
-   for _, r := range reps[1:] {
-      if v := get(r); v != first {
-         return first, conflictErr(id, field, first, v)
-      }
-   }
-   return first, nil
-}
-
-// medianBandwidth returns the median of the observed bandwidth values.
-// Even count: average of the two middle values, rounded down.
-func medianBandwidth(reps []Representation) uint32 {
-   vals := make([]uint32, len(reps))
-   for i, r := range reps {
-      vals[i] = r.Bandwidth
-   }
-   sort.Slice(vals, func(i, j int) bool { return vals[i] < vals[j] })
-   n := len(vals)
-   if n%2 == 1 {
-      return vals[n/2]
-   }
-   return uint32((uint64(vals[n/2-1]) + uint64(vals[n/2])) / 2)
-}
-
 // mergeRepresentation merges all occurrences of one representation ID
 // into a single Representation.
 func mergeRepresentation(reps []Representation) (*Representation, error) {
@@ -89,9 +38,6 @@ func mergeRepresentation(reps []Representation) (*Representation, error) {
    if out.SegmentTemplate, err = mergeSegmentTemplate(id, reps); err != nil {
       return nil, err
    }
-   if out.EssentialProperties, err = mergeEssentialProperties(id, reps); err != nil {
-      return nil, err
-   }
    return &out, nil
 }
 
@@ -99,10 +45,10 @@ func mergeRepresentation(reps []Representation) (*Representation, error) {
 func mergeBaseURL(id string, reps []Representation) (*BaseURL, error) {
    first := reps[0].BaseURL
    for _, r := range reps[1:] {
-      switch {
-      case (first == nil) != (r.BaseURL == nil):
-         return nil, conflictErr(id, "BaseURL presence", first != nil, r.BaseURL != nil)
-      case first != nil && r.BaseURL.URL != first.URL:
+      if err := checkPresence(id, "BaseURL", first, r.BaseURL); err != nil {
+         return nil, err
+      }
+      if first != nil && r.BaseURL.URL != first.URL {
          return nil, conflictErr(id, "BaseURL", first.URL, r.BaseURL.URL)
       }
    }
@@ -115,10 +61,10 @@ func mergeAudioChannelConfiguration(id string, reps []Representation) (*AudioCha
    first := reps[0].AudioChannelConfiguration
    for _, r := range reps[1:] {
       acc := r.AudioChannelConfiguration
-      switch {
-      case (first == nil) != (acc == nil):
-         return nil, conflictErr(id, "AudioChannelConfiguration presence", first != nil, acc != nil)
-      case first != nil && *acc != *first:
+      if err := checkPresence(id, "AudioChannelConfiguration", first, acc); err != nil {
+         return nil, err
+      }
+      if first != nil && *acc != *first {
          return nil, conflictErr(id, "AudioChannelConfiguration",
             first.SchemeIDURI+"/"+first.Value, acc.SchemeIDURI+"/"+acc.Value)
       }
@@ -130,12 +76,12 @@ func mergeAudioChannelConfiguration(id string, reps []Representation) (*AudioCha
 // PresentationTimeOffset is period-relative: first value, not checked.
 func mergeSegmentBase(id string, reps []Representation) (*SegmentBase, error) {
    first := reps[0].SegmentBase
-   if first == nil {
-      for _, r := range reps[1:] {
-         if r.SegmentBase != nil {
-            return nil, conflictErr(id, "SegmentBase presence", false, true)
-         }
+   for _, r := range reps[1:] {
+      if err := checkPresence(id, "SegmentBase", first, r.SegmentBase); err != nil {
+         return nil, err
       }
+   }
+   if first == nil {
       return nil, nil
    }
    out := &SegmentBase{
@@ -149,18 +95,14 @@ func mergeSegmentBase(id string, reps []Representation) (*SegmentBase, error) {
    for _, r := range reps[1:] {
       sb := r.SegmentBase
       switch {
-      case sb == nil:
-         return nil, conflictErr(id, "SegmentBase presence", true, false)
       case sb.IndexRange != first.IndexRange:
          return nil, conflictErr(id, "SegmentBase indexRange", first.IndexRange, sb.IndexRange)
       case sb.Timescale != first.Timescale:
          return nil, conflictErr(id, "SegmentBase timescale", first.Timescale, sb.Timescale)
       case (first.Initialization == nil) != (sb.Initialization == nil):
-         return nil, conflictErr(id, "SegmentBase Initialization presence",
-            first.Initialization != nil, sb.Initialization != nil)
+         return nil, conflictErr(id, "SegmentBase Initialization presence", first.Initialization != nil, sb.Initialization != nil)
       case first.Initialization != nil && sb.Initialization.Range != first.Initialization.Range:
-         return nil, conflictErr(id, "SegmentBase Initialization range",
-            first.Initialization.Range, sb.Initialization.Range)
+         return nil, conflictErr(id, "SegmentBase Initialization range", first.Initialization.Range, sb.Initialization.Range)
       }
    }
    return out, nil
@@ -171,12 +113,12 @@ func mergeSegmentBase(id string, reps []Representation) (*SegmentBase, error) {
 // are period-relative: first value, not checked.
 func mergeSegmentTemplate(id string, reps []Representation) (*SegmentTemplate, error) {
    first := reps[0].SegmentTemplate
-   if first == nil {
-      for _, r := range reps[1:] {
-         if r.SegmentTemplate != nil {
-            return nil, conflictErr(id, "SegmentTemplate presence", false, true)
-         }
+   for _, r := range reps[1:] {
+      if err := checkPresence(id, "SegmentTemplate", first, r.SegmentTemplate); err != nil {
+         return nil, err
       }
+   }
+   if first == nil {
       return nil, nil
    }
    out := &SegmentTemplate{
@@ -194,8 +136,6 @@ func mergeSegmentTemplate(id string, reps []Representation) (*SegmentTemplate, e
    for _, r := range reps[1:] {
       st := r.SegmentTemplate
       switch {
-      case st == nil:
-         return nil, conflictErr(id, "SegmentTemplate presence", true, false)
       case st.Media != first.Media:
          return nil, conflictErr(id, "SegmentTemplate media", first.Media, st.Media)
       case st.Duration != first.Duration:
@@ -205,18 +145,6 @@ func mergeSegmentTemplate(id string, reps []Representation) (*SegmentTemplate, e
       }
    }
    return out, nil
-}
-
-// mergeEssentialProperties merges the EssentialProperty list across
-// occurrences, requiring identical values in every occurrence.
-func mergeEssentialProperties(id string, reps []Representation) ([]EssentialProperty, error) {
-   first := reps[0].EssentialProperties
-   for _, r := range reps[1:] {
-      if !equalEssentialProperties(first, r.EssentialProperties) {
-         return nil, conflictErr(id, "EssentialProperty values", first, r.EssentialProperties)
-      }
-   }
-   return first, nil
 }
 
 // Representations returns one merged Representation per representation ID
@@ -230,27 +158,23 @@ func mergeEssentialProperties(id string, reps []Representation) ([]EssentialProp
 //     SegmentTimeline) are expected to differ between periods: they keep
 //     the first observed value and are not conflict-checked.
 //
-// The result is ordered by first appearance in the manifest.
-func (m *MPD) Representations() ([]Representation, error) {
-   var order []string
+// The order of the result is unspecified.
+func (m *MPD) Representations() ([]*Representation, error) {
    groups := make(map[string][]Representation)
-   for i := range m.Periods {
-      for j := range m.Periods[i].AdaptationSets {
-         for _, r := range m.Periods[i].AdaptationSets[j].Representations {
-            if _, seen := groups[r.ID]; !seen {
-               order = append(order, r.ID)
-            }
+   for _, p := range m.Periods {
+      for _, as := range p.AdaptationSets {
+         for _, r := range as.Representations {
             groups[r.ID] = append(groups[r.ID], r)
          }
       }
    }
-   out := make([]Representation, 0, len(order))
-   for _, id := range order {
-      merged, err := mergeRepresentation(groups[id])
+   out := make([]*Representation, 0, len(groups))
+   for _, reps := range groups {
+      merged, err := mergeRepresentation(reps)
       if err != nil {
          return nil, err
       }
-      out = append(out, *merged)
+      out = append(out, merged)
    }
    return out, nil
 }
