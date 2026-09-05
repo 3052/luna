@@ -1,38 +1,13 @@
 package dash
 
-import (
-   "net/url"
-   "slices"
-)
-
-// medianBandwidth returns the median bandwidth; even count averages the
-// two middle values, rounded down.
-func medianBandwidth(reps []Representation) uint64 {
-   vals := make([]uint64, len(reps))
-   for i, r := range reps {
-      vals[i] = r.Bandwidth
-   }
-   slices.Sort(vals)
-   n := len(vals)
-   if n%2 == 1 {
-      return vals[n/2]
-   }
-   return (vals[n/2-1] + vals[n/2]) / 2
-}
-
-// resolveURL resolves the URL reference ref against base using
-// (*url.URL).Parse. If base is nil, ref is returned unchanged; an
-// already-absolute ref passes through, and a relative ref is resolved
-// per RFC 3986.
-func resolveURL(base *url.URL, ref string) (string, error) {
-   if base == nil || ref == "" {
-      return ref, nil
-   }
-   u, err := base.Parse(ref)
-   if err != nil {
-      return "", err
-   }
-   return u.String(), nil
+// AudioChannelConfiguration describes the channel layout of audio content.
+type AudioChannelConfiguration struct {
+   // SchemeIDURI identifies the channel configuration scheme
+   // (e.g. "urn:mpeg:mpegB:cicp:ChannelConfiguration" or
+   // "urn:mpeg:dash:23003:3:audio_channel_configuration:2011").
+   SchemeIDURI string `xml:"schemeIdUri,attr"`
+   // Value is the number of channels (e.g. "6", "2").
+   Value string `xml:"value,attr"`
 }
 
 // BaseURL is a media URL for single-file addressing.
@@ -58,7 +33,7 @@ type Representation struct {
    // "text/vtt", "image/jpeg").
    MimeType string `xml:"mimeType,attr"`
    // Bandwidth is the peak bandwidth in bits per second.
-   Bandwidth uint64 `xml:"bandwidth,attr"`
+   Bandwidth uint32 `xml:"bandwidth,attr"`
 
    // Width / Height are the video dimensions.
    Width  uint32 `xml:"width,attr"`
@@ -70,20 +45,15 @@ type Representation struct {
 
    // BaseURL points to the media resource (single-file addressing).
    BaseURL *BaseURL `xml:"BaseURL"`
+   // AudioChannelConfiguration describes the audio channel layout.
+   AudioChannelConfiguration *AudioChannelConfiguration `xml:"AudioChannelConfiguration"`
    // SegmentBase describes byte-range addressing for a single file.
    SegmentBase *SegmentBase `xml:"SegmentBase"`
    // SegmentTemplate describes template-based multi-segment addressing.
    SegmentTemplate *SegmentTemplate `xml:"SegmentTemplate"`
-}
-
-// URL returns the absolute URL of the representation's media resource,
-// resolved against base. If base is nil, or the representation has no
-// BaseURL, the reference is returned as-is (empty if absent).
-func (r *Representation) URL(base *url.URL) (string, error) {
-   if r.BaseURL == nil {
-      return "", nil
-   }
-   return resolveURL(base, r.BaseURL.URL)
+   // EssentialProperties carry information required to process the
+   // representation (e.g. thumbnail tile layout).
+   EssentialProperties []EssentialProperty `xml:"EssentialProperty"`
 }
 
 // SegmentBase describes byte-range addressing of a single media file.
@@ -119,14 +89,6 @@ type SegmentTemplate struct {
    // SegmentTimeline lists explicit segment timing entries, used when
    // segments have non-uniform durations.
    SegmentTimeline *SegmentTimeline `xml:"SegmentTimeline"`
-}
-
-// URL returns the absolute URL of the segment media template, resolved
-// against base. If base is nil, the template is returned as-is.
-// Template identifiers such as $Number$ are left intact for the caller
-// to substitute.
-func (st *SegmentTemplate) URL(base *url.URL) (string, error) {
-   return resolveURL(base, st.Media)
 }
 
 // SegmentTimeline is a list of explicit segment timing entries.
