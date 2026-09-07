@@ -1,14 +1,3 @@
-CREATE TABLE segment_template (
-    duration          INTEGER,
-    media             TEXT,
-    presentation_time_offset INTEGER,
-    start_number      INTEGER,
-    timescale         INTEGER,
-    adaptation_set_id TEXT NOT NULL,
-    period_id         TEXT NOT NULL,
-    PRIMARY KEY (adaptation_set_id, period_id)
-);
-
 CREATE TABLE mpd (
     media_presentation_duration_sec REAL
 );
@@ -47,4 +36,34 @@ CREATE TABLE segment_base (
 CREATE TABLE initialization (
     representation_id TEXT PRIMARY KEY,
     range             TEXT
+);
+
+CREATE TABLE segment_template (
+    adaptation_set_id TEXT NOT NULL,
+    period_id         TEXT NOT NULL,
+    duration          INTEGER,
+    media             TEXT,
+    presentation_time_offset INTEGER,
+    start_number      INTEGER,
+    timescale         INTEGER,
+    PRIMARY KEY (adaptation_set_id, period_id)
+);
+
+CREATE TABLE segment_timeline (
+    period_id TEXT NOT NULL,
+    d         INTEGER NOT NULL,
+    PRIMARY KEY (period_id)
+);
+
+CREATE TABLE content_protection (
+    adaptation_set_id TEXT NOT NULL,
+    scheme_id_uri     TEXT NOT NULL,
+    default_kid       TEXT,
+    pssh              TEXT,
+    PRIMARY KEY (adaptation_set_id, scheme_id_uri)
+);
+
+CREATE TABLE role (
+    adaptation_set_id TEXT PRIMARY KEY,
+    value             TEXT
 );
