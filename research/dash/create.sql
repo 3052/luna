@@ -4,7 +4,7 @@ CREATE TABLE mpd (
 
 CREATE TABLE period (
     id           TEXT PRIMARY KEY,
-    duration_sec REAL
+    duration REAL
 );
 
 CREATE TABLE adaptation_set (

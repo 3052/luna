@@ -43,7 +43,7 @@ INSERT INTO initialization (representation_id, range) VALUES
 
 INSERT INTO mpd (media_presentation_duration_sec) VALUES (5660.613291666667);
 
-INSERT INTO period (id, duration_sec) VALUES
+INSERT INTO period (id, duration) VALUES
 ('0', 1020.5195),
 ('1', 736.1103750000001),
 ('2', 1037.6616249999997),

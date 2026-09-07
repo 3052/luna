@@ -2,8 +2,8 @@
 
 ~~~
 # 1. load schema first (creates the tables)
-tursodb edcbee.db ".read schema.sql"
+sqlite3 edcbee.db '.read create.sql'
 
 # 2. then load data (tables must already exist)
-tursodb edcbee.db ".read data.sql"
+sqlite3 edcbee.db '.read insert.sql'
 ~~~
