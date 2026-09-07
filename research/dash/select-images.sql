@@ -6,7 +6,7 @@ seg AS (
         st.media,
         COALESCE(st.start_number, 1) AS start_number,
         CAST(CEIL(
-            CAST(SUBSTR(p.duration, 3) AS REAL)
+            CAST(p.duration AS REAL)
             / (st.duration * 1.0 / COALESCE(st.timescale, 1))
         ) AS INTEGER) AS cnt
     FROM representation r
@@ -17,17 +17,16 @@ seg AS (
       ON p.id = st.period_id
     WHERE r.id = 'images'
 ),
-numbers(i, rep_id, period_id, media, n) AS (
-    SELECT 0, rep_id, period_id, media, start_number FROM seg
+numbers(i, period_id, media, n, cnt) AS (
+    SELECT 0, period_id, media, start_number, cnt FROM seg
     UNION ALL
-    SELECT i + 1, rep_id, period_id, media, n + 1
+    SELECT i + 1, period_id, media, n + 1, cnt
     FROM numbers
-    WHERE i + 1 < (SELECT cnt FROM seg WHERE seg.period_id = numbers.period_id)
+    WHERE i + 1 < cnt
 )
 SELECT
-    rep_id,
-    period_id,
-    n AS number,
+    MIN(period_id) AS period_id,
     REPLACE(media, '$Number$', n) AS url
 FROM numbers
-ORDER BY period_id, n;
+GROUP BY url
+ORDER BY MIN(n);

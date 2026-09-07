@@ -1,5 +1,4 @@
 SELECT
-    r.base_url,
     REPLACE(st.media, '$Number$', st.start_number) AS media
 FROM representation r
 LEFT JOIN segment_template st
