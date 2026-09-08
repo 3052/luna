@@ -1,3 +1,4 @@
+-- select-images.sql
 WITH RECURSIVE
 seg AS (
     SELECT

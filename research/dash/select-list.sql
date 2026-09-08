@@ -1,3 +1,4 @@
+-- select-list.sql
 SELECT 
     AVG(r.bandwidth) AS avg_bandwidth,
     MIN(r.width) AS min_width,

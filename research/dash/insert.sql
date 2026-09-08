@@ -1,3 +1,4 @@
+-- insert.sql
 INSERT INTO adaptation_set (id, period_id, lang, label) VALUES
 ('0','0','en-US',NULL), ('1','0','en-US',NULL), ('2','0',NULL,NULL), ('3','0',NULL,NULL),
 ('4','0',NULL,NULL), ('5','0',NULL,NULL), ('6','0',NULL,NULL), ('7','0','en-US','en-US CC'), ('8','0',NULL,NULL),
@@ -34,12 +35,6 @@ INSERT INTO content_protection (adaptation_set_id, scheme_id_uri, default_kid, p
 ('6','urn:mpeg:dash:mp4protection:2011','01059967-8fa4-9384-f365-aba6a95d4a9f',NULL),
 ('6','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',NULL,'AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
 ('6','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',NULL,'AAAAbnBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAE4SEAEAmWePpJOE82WrpqldSp8SEAEFmWePpJOE82WrpqldSp8SEAECmWeP');
-
-INSERT INTO initialization (representation_id, range) VALUES
-('a0','0-657'), ('a1','0-722'),
-('v0','0-793'), ('v1','0-793'), ('v2','0-793'), ('v4','0-793'),
-('v5','0-794'), ('v3','0-794'),
-('v6','0-860'), ('v9','0-860'), ('v7','0-860'), ('v8','0-860');
 
 INSERT INTO mpd (media_presentation_duration_sec) VALUES (5660.613291666667);
 
@@ -146,12 +141,6 @@ INSERT INTO representation (id, period_id, adaptation_set_id, codecs, bandwidth,
 INSERT INTO role (adaptation_set_id, value) VALUES
 ('2','main'), ('3','main'), ('4','main'), ('5','main'), ('6','main'), ('7','caption');
 
-INSERT INTO segment_base (representation_id, index_range) VALUES
-('a0','658-17705'), ('a1','723-17770'),
-('v0','794-17793'), ('v1','794-17793'), ('v2','794-17793'), ('v4','794-17793'),
-('v5','795-17794'), ('v3','795-17794'),
-('v6','861-17860'), ('v9','861-17860'), ('v7','861-17860'), ('v8','861-17860');
-
 INSERT INTO segment_template (adaptation_set_id, period_id, duration, media, presentation_time_offset, start_number, timescale) VALUES
 ('7','0',NULL,'t/aa517e/t0/$Number$.vtt',NULL,1,1000),
 ('8','0',5,'i/1971b3/images-$Number$.jpg',NULL,0,NULL),
@@ -168,3 +157,4 @@ INSERT INTO segment_template (adaptation_set_id, period_id, duration, media, pre
 
 INSERT INTO segment_timeline (period_id, d) VALUES
 ('0',1020519), ('1',736110), ('2',1037661), ('3',963754), ('4',879628), ('5',1022938);
+-- insert.sql

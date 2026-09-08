@@ -1,3 +1,4 @@
+-- create.sql
 CREATE TABLE mpd (
     media_presentation_duration_sec REAL
 );
@@ -26,16 +27,6 @@ CREATE TABLE representation (
     height              INTEGER,
     base_url            TEXT,
     PRIMARY KEY (id, period_id)
-);
-
-CREATE TABLE segment_base (
-    representation_id TEXT PRIMARY KEY,
-    index_range       TEXT
-);
-
-CREATE TABLE initialization (
-    representation_id TEXT PRIMARY KEY,
-    range             TEXT
 );
 
 CREATE TABLE segment_template (
@@ -67,3 +58,4 @@ CREATE TABLE role (
     adaptation_set_id TEXT PRIMARY KEY,
     value             TEXT
 );
+-- create.sql
