@@ -1,11 +1,11 @@
 -- create.sql
 CREATE TABLE mpd (
-    media_presentation_duration_sec REAL
+    media_presentation_duration TEXT
 );
 
 CREATE TABLE period (
     id           TEXT PRIMARY KEY,
-    duration REAL
+    duration TEXT
 );
 
 CREATE TABLE adaptation_set (

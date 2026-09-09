@@ -36,15 +36,15 @@ INSERT INTO content_protection (adaptation_set_id, scheme_id_uri, default_kid, p
 ('6','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',NULL,'AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
 ('6','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',NULL,'AAAAbnBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAE4SEAEAmWePpJOE82WrpqldSp8SEAEFmWePpJOE82WrpqldSp8SEAECmWeP');
 
-INSERT INTO mpd (media_presentation_duration_sec) VALUES (5660.613291666667);
+INSERT INTO mpd (media_presentation_duration) VALUES ('PT5660.613291666667S');
 
 INSERT INTO period (id, duration) VALUES
-('0', 1020.5195),
-('1', 736.1103750000001),
-('2', 1037.6616249999997),
-('3', 963.7544583333333),
-('4', 879.6287499999999),
-('5', 1022.9385833333336);
+('0', 'PT1020.5195S'),
+('1', 'PT736.1103750000001S'),
+('2', 'PT1037.6616249999997S'),
+('3', 'PT963.7544583333333S'),
+('4', 'PT879.6287499999999S'),
+('5', 'PT1022.9385833333336S');
 
 INSERT INTO representation (id, period_id, adaptation_set_id, codecs, bandwidth, mime_type, width, height, base_url) VALUES
 -- period 0

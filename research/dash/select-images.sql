@@ -7,7 +7,7 @@ seg AS (
         st.media,
         COALESCE(st.start_number, 1) AS start_number,
         CAST(CEIL(
-            CAST(p.duration AS REAL)
+            CAST(REPLACE(REPLACE(p.duration, 'PT', ''), 'S', '') AS REAL)
             / (st.duration * 1.0 / COALESCE(st.timescale, 1))
         ) AS INTEGER) AS cnt
     FROM representation r
