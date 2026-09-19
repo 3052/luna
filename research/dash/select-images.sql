@@ -12,6 +12,7 @@ seg AS (
         ) AS INTEGER) AS cnt
     FROM representation r
     JOIN segment_template st
+        -- PK is (adaptation_set_id, period_id): both conditions required
       ON st.adaptation_set_id = r.adaptation_set_id
      AND st.period_id         = r.period_id
     JOIN period p

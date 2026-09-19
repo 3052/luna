@@ -9,7 +9,9 @@ SELECT
     r.id
 FROM representation r
 JOIN adaptation_set a
-  ON a.id = r.adaptation_set_id
+    -- PK is (id, period_id): both conditions required
+  ON a.id         = r.adaptation_set_id
+ AND a.period_id = r.period_id
 GROUP BY r.id
 ORDER BY
    height,
