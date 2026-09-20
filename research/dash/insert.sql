@@ -13,30 +13,31 @@ INSERT INTO adaptation_set (id, period_id, lang, label) VALUES
 ('0','5','en-US',NULL), ('1','5','en-US',NULL), ('2','5',NULL,NULL), ('3','5',NULL,NULL),
 ('4','5',NULL,NULL), ('5','5',NULL,NULL), ('6','5',NULL,NULL), ('7','5','en-US','en-US CC'), ('8','5',NULL,NULL);
 
-INSERT INTO content_protection (adaptation_set_id, scheme_id_uri, default_kid, pssh) VALUES
-('0','urn:mpeg:dash:mp4protection:2011','01009967-8fa4-9384-f365-aba6a95d4a9f',NULL),
-('0','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',NULL,'AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
-('0','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',NULL,'AAAAOHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABgSEAEAmWePpJOE82WrpqldSp9I49yVmwY='),
-('1','urn:mpeg:dash:mp4protection:2011','01009967-8fa4-9384-f365-aba6a95d4a9f',NULL),
-('1','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',NULL,'AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
-('1','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',NULL,'AAAAOHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABgSEAEAmWePpJOE82WrpqldSp9I49yVmwY='),
-('2','urn:mpeg:dash:mp4protection:2011','01019967-8fa4-9384-f365-aba6a95d4a9f',NULL),
-('2','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',NULL,'AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
-('2','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',NULL,'AAAAbnBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAE4SEAEAmWePpJOE82WrpqldSp8SEAEFmWePpJOE82WrpqldSp8SEAECmWeP'),
-('3','urn:mpeg:dash:mp4protection:2011','01029967-8fa4-9384-f365-aba6a95d4a9f',NULL),
-('3','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',NULL,'AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
-('3','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',NULL,'AAAAbnBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAE4SEAEAmWePpJOE82WrpqldSp8SEAEFmWePpJOE82WrpqldSp8SEAECmWeP'),
-('4','urn:mpeg:dash:mp4protection:2011','01019967-8fa4-9384-f365-aba6a95d4a9f',NULL),
-('4','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',NULL,'AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
-('4','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',NULL,'AAAAbnBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAE4SEAEAmWePpJOE82WrpqldSp8SEAEFmWePpJOE82WrpqldSp8SEAECmWeP'),
-('5','urn:mpeg:dash:mp4protection:2011','01029967-8fa4-9384-f365-aba6a95d4a9f',NULL),
-('5','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',NULL,'AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
-('5','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',NULL,'AAAAbnBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAE4SEAEAmWePpJOE82WrpqldSp8SEAEFmWePpJOE82WrpqldSp8SEAECmWeP'),
-('6','urn:mpeg:dash:mp4protection:2011','01059967-8fa4-9384-f365-aba6a95d4a9f',NULL),
-('6','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95',NULL,'AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
-('6','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',NULL,'AAAAbnBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAE4SEAEAmWePpJOE82WrpqldSp8SEAEFmWePpJOE82WrpqldSp8SEAECmWeP');
+INSERT INTO content_protection (adaptation_set_id, scheme_id_uri, pssh) VALUES
+('0','urn:mpeg:dash:mp4protection:2011',NULL),
+('0','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95','AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
+('0','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed','AAAAOHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABgSEAEAmWePpJOE82WrpqldSp9I49yVmwY='),
+('1','urn:mpeg:dash:mp4protection:2011',NULL),
+('1','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95','AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
+('1','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed','AAAAOHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABgSEAEAmWePpJOE82WrpqldSp9I49yVmwY='),
+('2','urn:mpeg:dash:mp4protection:2011',NULL),
+('2','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95','AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
+('2','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed','AAAAbnBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAE4SEAEAmWePpJOE82WrpqldSp8SEAEFmWePpJOE82WrpqldSp8SEAECmWeP'),
+('3','urn:mpeg:dash:mp4protection:2011',NULL),
+('3','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95','AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
+('3','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed','AAAAbnBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAE4SEAEAmWePpJOE82WrpqldSp8SEAEFmWePpJOE82WrpqldSp8SEAECmWeP'),
+('4','urn:mpeg:dash:mp4protection:2011',NULL),
+('4','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95','AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
+('4','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed','AAAAbnBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAE4SEAEAmWePpJOE82WrpqldSp8SEAEFmWePpJOE82WrpqldSp8SEAECmWeP'),
+('5','urn:mpeg:dash:mp4protection:2011',NULL),
+('5','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95','AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
+('5','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed','AAAAbnBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAE4SEAEAmWePpJOE82WrpqldSp8SEAEFmWePpJOE82WrpqldSp8SEAECmWeP'),
+('6','urn:mpeg:dash:mp4protection:2011',NULL),
+('6','urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95','AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
+('6','urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed','AAAAbnBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAE4SEAEAmWePpJOE82WrpqldSp8SEAEFmWePpJOE82WrpqldSp8SEAECmWeP');
 
-INSERT INTO mpd (media_presentation_duration) VALUES ('PT5660.613291666667S');
+INSERT INTO mpd (base_url) VALUES
+('https://absma4aqdeqgaaaybilzuzicoaeq2.cf.prd.media.h264.io/gcs/4ddcc57a-d8cc-4fa1-b193-292717266c72/edcbee.mpd');
 
 INSERT INTO period (id, duration) VALUES
 ('0', 'PT1020.5195S'),
