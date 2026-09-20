@@ -6,19 +6,12 @@
 INSERT INTO period (id, duration) VALUES
 (NULL, NULL);
 
--- Source AdaptationSets carry no @id (id is optional in DASH; this MPD
--- omits it on all four). No period id exists to reference either.
--- Consequence: child tables cannot reference these rows by any
--- source-derived value; their adaptation_set_id is NULL below.
--- Linkage by document order is lost in this schema.
-INSERT INTO adaptation_set (id, period_id, lang, label) VALUES
-(NULL, NULL, NULL, NULL),
-(NULL, NULL, 'eng', 'English'),
-(NULL, NULL, 'spa', 'Spanish (Español)'),
-(NULL, NULL, NULL, NULL);
+INSERT INTO adaptation_set (id, position, period_id, lang, label) VALUES
+(NULL, 0, NULL, NULL, NULL),
+(NULL, 1, NULL, 'eng', 'English'),
+(NULL, 2, NULL, 'spa', 'Spanish (Español)'),
+(NULL, 3, NULL, NULL, NULL);
 
--- representation @id values ARE present in source and stored verbatim.
--- All other association columns are NULL: no source ids exist to put there.
 INSERT INTO representation (id, period_id, adaptation_set_id, codecs, bandwidth, mime_type, width, height, base_url) VALUES
 ('a5c648a8',NULL,NULL,'avc1.4D400C',207184,'video/mp4',256,144,NULL),
 ('e63ccbea',NULL,NULL,'avc1.4D401E',775738,'video/mp4',640,360,NULL),
