@@ -1,26 +1,29 @@
+import sys
 import xml.etree.ElementTree as ET
 
 NS = {"mpd": "urn:mpeg:dash:schema:mpd:2011"}
-AS_ID = {"eng": "1", "spa": "2"}
+AS_LANGS = {"eng", "spa"}
 
 def main(path: str) -> None:
     tree = ET.parse(path)
-    for as_el in tree.getroot().iter(f"{{{NS['mpd']}}}AdaptationSet"):
+    root = tree.getroot()
+    mpd_ns = NS["mpd"]
+    for as_el in root.iter(f"{{{mpd_ns}}}AdaptationSet"):
         lang = as_el.get("lang")
-        if lang not in AS_ID:
+        if lang not in AS_LANGS:
             continue
-        timeline = as_el.find(f".//{{{NS['mpd']}}}SegmentTimeline")
+        timeline = as_el.find(f".//{{{mpd_ns}}}SegmentTimeline")
         if timeline is None:
             continue
-        as_id = AS_ID[lang]
-        rows = [
-            f"  ('{as_id}','0',{pos:>5},{s.get('d'):>6},{s.get('r','0')})"
-            for pos, s in enumerate(timeline.findall(f"{{{NS['mpd']}}}S"), 1)
-        ]
-        print(f"\n-- AS {as_id} ({lang})")
+        rows = []
+        for pos, s in enumerate(timeline.findall(f"{{{mpd_ns}}}S"), 1):
+            d = s.get("d")
+            r = s.get("r")  # absent @r -> NULL
+            r_sql = r if r is not None else "NULL"
+            rows.append(f"  (NULL,NULL,{pos:>5},{d:>6},{r_sql})")
+        print(f"\n-- AS lang={lang}")
         print("INSERT INTO segment_timeline (adaptation_set_id, period_id, position, d, r) VALUES")
         print(",\n".join(rows) + ";")
 
 if __name__ == "__main__":
-    import sys
     main(sys.argv[1] if len(sys.argv) > 1 else "kanopy.mpd")

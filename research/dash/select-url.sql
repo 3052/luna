@@ -29,14 +29,15 @@ seg AS (
       ) AS INTEGER), 1) AS cnt
    FROM representation r
    LEFT JOIN segment_template st
-      -- PK is (adaptation_set_id, period_id): both conditions required
+      -- period_id is required: template rows for the same
+      -- adaptation_set_id differ across periods
       ON st.adaptation_set_id = r.adaptation_set_id
      AND st.period_id         = r.period_id
    JOIN period p
       ON p.id = r.period_id
    -- hbo max:
-   -- WHERE r.id = 'a1'
-   -- WHERE r.id = 't0'
+   --WHERE r.id = 'a1'
+   --WHERE r.id = 't0'
    --WHERE r.id = 'images'
    -- tubi:
    WHERE r.id = '0'

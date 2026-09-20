@@ -3,7 +3,7 @@
 INSERT INTO mpd (base_url) VALUES ('https://nc-aka2.tubi.video/bb758e57-cc67-46a9-ad4e-69a611c04491/qgfb4rnwib.mpd?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjZG5fcHJlZml4IjoiaHR0cHM6Ly9uYy1ha2EyLnR1YmkudmlkZW8iLCJleHAiOjE3OTA0NDU2MDAsIm1lZGlhX3NpZyI6Mjg2ODUwOTl9.rI1jXqm3HfAeD771C3BN0xK9-C8UbUWy8pB-hc8h1L8');
 
 INSERT INTO period (id, duration) VALUES
-('0', 'PT6788.82373046875S');
+('0', NULL);
 
 INSERT INTO adaptation_set (id, period_id, lang, label) VALUES
 ('0', '0', 'en', 'English'),

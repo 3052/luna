@@ -10,18 +10,18 @@ CREATE TABLE period (
 );
 
 CREATE TABLE adaptation_set (
-   id        TEXT NOT NULL,
-   period_id TEXT NOT NULL,
+   id        TEXT,
+   period_id TEXT,
    lang      TEXT,
    label     TEXT
 );
 
 CREATE TABLE representation (
-   id                TEXT NOT NULL,
-   period_id         TEXT NOT NULL,
-   adaptation_set_id TEXT NOT NULL,
+   id                TEXT,
+   period_id         TEXT,
+   adaptation_set_id TEXT,
    codecs            TEXT,
-   bandwidth         INTEGER NOT NULL,
+   bandwidth         INTEGER,
    mime_type         TEXT,
    width             INTEGER,
    height            INTEGER,
@@ -29,8 +29,8 @@ CREATE TABLE representation (
 );
 
 CREATE TABLE segment_template (
-   adaptation_set_id        TEXT NOT NULL,
-   period_id                TEXT NOT NULL,
+   adaptation_set_id        TEXT,
+   period_id                TEXT,
    duration                 INTEGER,
    media                    TEXT,
    presentation_time_offset INTEGER,
@@ -39,16 +39,16 @@ CREATE TABLE segment_template (
 );
 
 CREATE TABLE segment_timeline (
-   adaptation_set_id TEXT NOT NULL,
-   period_id         TEXT NOT NULL,
-   position          INTEGER NOT NULL,
-   d                 INTEGER NOT NULL,
-   r                 INTEGER NOT NULL DEFAULT 0
+   adaptation_set_id TEXT,
+   period_id         TEXT,
+   position          INTEGER,
+   d                 INTEGER,
+   r                 INTEGER
 );
 
 CREATE TABLE content_protection (
-   adaptation_set_id TEXT NOT NULL,
-   scheme_id_uri     TEXT NOT NULL,
+   adaptation_set_id TEXT,
+   scheme_id_uri     TEXT,
    pssh              TEXT
 );
 
