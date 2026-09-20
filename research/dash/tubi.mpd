@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MPD
+	xmlns="urn:mpeg:dash:schema:mpd:2011"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011" minBufferTime="PT2S" type="static" mediaPresentationDuration="PT3587.654296875S">
+	<Period id="0">
+		<AdaptationSet id="0" contentType="video" maxWidth="1280" maxHeight="720" frameRate="23976/800" subsegmentAlignment="true" par="16:9" label="video">
+			<Representation id="0" bandwidth="270816" codecs="avc1.4d401e" mimeType="video/mp4" sar="1:1" width="426" height="240">
+				<BaseURL>9zn0re6y.mp4?hdntl=exp=1790470419~acl=/3674894f-90bb-48db-9223-58c0bb46bdb6/*~hmac=bd64d0d482fe8f168639f913b6108436457083c5e3070b66ba3fc9ba78a5f5d4</BaseURL>
+				<SegmentBase indexRange="864-11083" timescale="23976">
+					<Initialization range="0-863"/>
+				</SegmentBase>
+			</Representation>
+			<Representation id="2" bandwidth="657858" codecs="avc1.4d401e" mimeType="video/mp4" sar="1:1" width="640" height="360">
+				<BaseURL>dw2vbwmr.mp4?hdntl=exp=1790470419~acl=/3674894f-90bb-48db-9223-58c0bb46bdb6/*~hmac=bd64d0d482fe8f168639f913b6108436457083c5e3070b66ba3fc9ba78a5f5d4</BaseURL>
+				<SegmentBase indexRange="865-11084" timescale="23976">
+					<Initialization range="0-864"/>
+				</SegmentBase>
+			</Representation>
+			<Representation id="3" bandwidth="1281236" codecs="avc1.640028" mimeType="video/mp4" sar="1:1" width="854" height="480">
+				<BaseURL>ku6qn50r.mp4?hdntl=exp=1790470419~acl=/3674894f-90bb-48db-9223-58c0bb46bdb6/*~hmac=bd64d0d482fe8f168639f913b6108436457083c5e3070b66ba3fc9ba78a5f5d4</BaseURL>
+				<SegmentBase indexRange="871-11090" timescale="23976">
+					<Initialization range="0-870"/>
+				</SegmentBase>
+			</Representation>
+			<Representation id="4" bandwidth="1925419" codecs="avc1.640028" mimeType="video/mp4" sar="1:1" width="1024" height="576">
+				<BaseURL>u6c00wgc.mp4?hdntl=exp=1790470419~acl=/3674894f-90bb-48db-9223-58c0bb46bdb6/*~hmac=bd64d0d482fe8f168639f913b6108436457083c5e3070b66ba3fc9ba78a5f5d4</BaseURL>
+				<SegmentBase indexRange="870-11089" timescale="23976">
+					<Initialization range="0-869"/>
+				</SegmentBase>
+			</Representation>
+			<Representation id="5" bandwidth="2554304" codecs="avc1.640028" mimeType="video/mp4" sar="1:1" width="1280" height="720">
+				<BaseURL>4rla65ji.mp4?hdntl=exp=1790470419~acl=/3674894f-90bb-48db-9223-58c0bb46bdb6/*~hmac=bd64d0d482fe8f168639f913b6108436457083c5e3070b66ba3fc9ba78a5f5d4</BaseURL>
+				<SegmentBase indexRange="870-11089" timescale="23976">
+					<Initialization range="0-869"/>
+				</SegmentBase>
+			</Representation>
+			<Label>video</Label>
+		</AdaptationSet>
+		<AdaptationSet id="1" contentType="audio" lang="ko" subsegmentAlignment="true" label="Korean">
+			<Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+			<Representation id="1" bandwidth="132236" codecs="mp4a.40.2" mimeType="audio/mp4" audioSamplingRate="44100">
+				<AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+				<BaseURL>7p8ybomm.mp4?hdntl=exp=1790470419~acl=/3674894f-90bb-48db-9223-58c0bb46bdb6/*~hmac=bd64d0d482fe8f168639f913b6108436457083c5e3070b66ba3fc9ba78a5f5d4</BaseURL>
+				<SegmentBase indexRange="787-22346" timescale="44100">
+					<Initialization range="0-786"/>
+				</SegmentBase>
+			</Representation>
+			<Label>Korean</Label>
+		</AdaptationSet>
+	</Period>
+</MPD>
+

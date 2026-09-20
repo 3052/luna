@@ -1,17 +1,60 @@
--- insert.sql
+-- hbo-max.sql
+
 INSERT INTO adaptation_set (id, period_id, lang, label) VALUES
-('0','0','en-US',NULL), ('1','0','en-US',NULL), ('2','0',NULL,NULL), ('3','0',NULL,NULL),
-('4','0',NULL,NULL), ('5','0',NULL,NULL), ('6','0',NULL,NULL), ('7','0','en-US','en-US CC'), ('8','0',NULL,NULL),
-('0','1','en-US',NULL), ('1','1','en-US',NULL), ('2','1',NULL,NULL), ('3','1',NULL,NULL),
-('4','1',NULL,NULL), ('5','1',NULL,NULL), ('6','1',NULL,NULL), ('7','1','en-US','en-US CC'), ('8','1',NULL,NULL),
-('0','2','en-US',NULL), ('1','2','en-US',NULL), ('2','2',NULL,NULL), ('3','2',NULL,NULL),
-('4','2',NULL,NULL), ('5','2',NULL,NULL), ('6','2',NULL,NULL), ('7','2','en-US','en-US CC'), ('8','2',NULL,NULL),
-('0','3','en-US',NULL), ('1','3','en-US',NULL), ('2','3',NULL,NULL), ('3','3',NULL,NULL),
-('4','3',NULL,NULL), ('5','3',NULL,NULL), ('6','3',NULL,NULL), ('7','3','en-US','en-US CC'), ('8','3',NULL,NULL),
-('0','4','en-US',NULL), ('1','4','en-US',NULL), ('2','4',NULL,NULL), ('3','4',NULL,NULL),
-('4','4',NULL,NULL), ('5','4',NULL,NULL), ('6','4',NULL,NULL), ('7','4','en-US','en-US CC'), ('8','4',NULL,NULL),
-('0','5','en-US',NULL), ('1','5','en-US',NULL), ('2','5',NULL,NULL), ('3','5',NULL,NULL),
-('4','5',NULL,NULL), ('5','5',NULL,NULL), ('6','5',NULL,NULL), ('7','5','en-US','en-US CC'), ('8','5',NULL,NULL);
+('0','0','en-US',NULL),
+('1','0','en-US',NULL),
+('2','0',NULL,NULL),
+('3','0',NULL,NULL),
+('4','0',NULL,NULL),
+('5','0',NULL,NULL),
+('6','0',NULL,NULL),
+('7','0','en-US','en-US CC'),
+('8','0',NULL,NULL),
+('0','1','en-US',NULL),
+('1','1','en-US',NULL),
+('2','1',NULL,NULL),
+('3','1',NULL,NULL),
+('4','1',NULL,NULL),
+('5','1',NULL,NULL),
+('6','1',NULL,NULL),
+('7','1','en-US','en-US CC'),
+('8','1',NULL,NULL),
+('0','2','en-US',NULL),
+('1','2','en-US',NULL),
+('2','2',NULL,NULL),
+('3','2',NULL,NULL),
+('4','2',NULL,NULL),
+('5','2',NULL,NULL),
+('6','2',NULL,NULL),
+('7','2','en-US','en-US CC'),
+('8','2',NULL,NULL),
+('0','3','en-US',NULL),
+('1','3','en-US',NULL),
+('2','3',NULL,NULL),
+('3','3',NULL,NULL),
+('4','3',NULL,NULL),
+('5','3',NULL,NULL),
+('6','3',NULL,NULL),
+('7','3','en-US','en-US CC'),
+('8','3',NULL,NULL),
+('0','4','en-US',NULL),
+('1','4','en-US',NULL),
+('2','4',NULL,NULL),
+('3','4',NULL,NULL),
+('4','4',NULL,NULL),
+('5','4',NULL,NULL),
+('6','4',NULL,NULL),
+('7','4','en-US','en-US CC'),
+('8','4',NULL,NULL),
+('0','5','en-US',NULL),
+('1','5','en-US',NULL),
+('2','5',NULL,NULL),
+('3','5',NULL,NULL),
+('4','5',NULL,NULL),
+('5','5',NULL,NULL),
+('6','5',NULL,NULL),
+('7','5','en-US','en-US CC'),
+('8','5',NULL,NULL);
 
 INSERT INTO content_protection (adaptation_set_id, scheme_id_uri, pssh) VALUES
 ('0','urn:mpeg:dash:mp4protection:2011',NULL),
@@ -140,7 +183,12 @@ INSERT INTO representation (id, period_id, adaptation_set_id, codecs, bandwidth,
 ('images','5','8',NULL,7341,'image/jpeg',352,190,NULL);
 
 INSERT INTO role (adaptation_set_id, value) VALUES
-('2','main'), ('3','main'), ('4','main'), ('5','main'), ('6','main'), ('7','caption');
+('2','main'),
+('3','main'),
+('4','main'),
+('5','main'),
+('6','main'),
+('7','caption');
 
 INSERT INTO segment_template (adaptation_set_id, period_id, duration, media, presentation_time_offset, start_number, timescale) VALUES
 ('7','0',NULL,'t/aa517e/t0/$Number$.vtt',NULL,1,1000),
@@ -157,5 +205,11 @@ INSERT INTO segment_template (adaptation_set_id, period_id, duration, media, pre
 ('8','5',5,'i/1971b3/images-$Number$.jpg',NULL,927,NULL);
 
 INSERT INTO segment_timeline (period_id, d) VALUES
-('0',1020519), ('1',736110), ('2',1037661), ('3',963754), ('4',879628), ('5',1022938);
--- insert.sql
+('0',1020519),
+('1',736110),
+('2',1037661),
+('3',963754),
+('4',879628),
+('5',1022938);
+
+-- hbo-max.sql
