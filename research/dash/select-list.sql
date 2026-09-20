@@ -1,6 +1,6 @@
 -- select-list.sql
 SELECT
-   AVG(r.bandwidth) AS bandwidth,
+   CAST(AVG(r.bandwidth) AS INTEGER) AS bandwidth,
    MIN(r.width) AS width,
    MIN(r.height) AS height,
    MIN(r.codecs) AS codecs,
@@ -14,5 +14,9 @@ JOIN adaptation_set a
   AND a.period_id = r.period_id
 GROUP BY r.id
 ORDER BY
-   height,
-   bandwidth;
+   CASE r.mime_type
+      WHEN 'video/mp4' THEN 3
+      WHEN 'audio/mp4' THEN 2
+      ELSE 1
+   END,
+   r.height;

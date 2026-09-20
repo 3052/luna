@@ -9,6 +9,15 @@ sqlite3 hbo-max.db '.read create.sql'
 sqlite3 hbo-max.db '.read hbo-max.sql'
 ~~~
 
+## kanopy
+
+~~~
+kanopy a=https://kanopy.com/product/justwatch-12936750
+
+sqlite3 kanopy.db '.read create.sql'
+sqlite3 kanopy.db '.read kanopy.sql'
+~~~
+
 ## tubi
 
 ~~~

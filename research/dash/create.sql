@@ -41,9 +41,12 @@ CREATE TABLE segment_template (
 );
 
 CREATE TABLE segment_timeline (
-   period_id TEXT NOT NULL,
-   d         INTEGER NOT NULL,
-   PRIMARY KEY (period_id)
+   adaptation_set_id TEXT NOT NULL,
+   period_id         TEXT NOT NULL,
+   position          INTEGER NOT NULL,
+   d                 INTEGER NOT NULL,
+   r                 INTEGER NOT NULL DEFAULT 0,
+   PRIMARY KEY (adaptation_set_id, period_id, position)
 );
 
 CREATE TABLE content_protection (

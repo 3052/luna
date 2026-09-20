@@ -204,12 +204,12 @@ INSERT INTO segment_template (adaptation_set_id, period_id, duration, media, pre
 ('7','5',NULL,'t/aa517e/t0/$Number$.vtt',4637674,6,1000),
 ('8','5',5,'i/1971b3/images-$Number$.jpg',NULL,927,NULL);
 
-INSERT INTO segment_timeline (period_id, d) VALUES
-('0',1020519),
-('1',736110),
-('2',1037661),
-('3',963754),
-('4',879628),
-('5',1022938);
+INSERT INTO segment_timeline (adaptation_set_id, period_id, position, d, r) VALUES
+('7','0',1,1020519,0),
+('7','1',1, 736110,0),
+('7','2',1,1037661,0),
+('7','3',1, 963754,0),
+('7','4',1, 879628,0),
+('7','5',1,1022938,0);
 
 -- hbo-max.sql
