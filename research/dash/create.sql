@@ -46,15 +46,7 @@ CREATE TABLE segment_timeline (
    r                       INTEGER
 );
 
-CREATE TABLE content_protection (
-   adaptation_set_position INTEGER,
-   scheme_id_uri           TEXT,
-   pssh                    TEXT
-);
-
 CREATE TABLE role (
    adaptation_set_position INTEGER,
    value                   TEXT
 );
-
--- create.sql

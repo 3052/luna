@@ -16,13 +16,5 @@ INSERT INTO representation (id, period_id, adaptation_set_position, codecs, band
 ('3','0',1,'hev1.1.6.L93.90', 1701215, 'video/mp4', 1024,  576, 'pc94r74v.mp4?hdntl=exp=1790461396~acl=/bb758e57-cc67-46a9-ad4e-69a611c04491/*~hmac=a469584eeac43de89ce733cca1ece9e4445bf704beb00e1b28f9d1b5b1779932'),
 ('4','0',1,'hev1.1.6.L93.90', 1977285, 'video/mp4', 1280,  720, 'vd9d55ks.mp4?hdntl=exp=1790461396~acl=/bb758e57-cc67-46a9-ad4e-69a611c04491/*~hmac=a469584eeac43de89ce733cca1ece9e4445bf704beb00e1b28f9d1b5b1779932');
 
-INSERT INTO content_protection (adaptation_set_position, scheme_id_uri, pssh) VALUES
-(0,'urn:mpeg:dash:mp4protection:2011',NULL),
-(0,'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95','AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
-(0,'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed','AAAAOHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABgSEAPJu/7tFE1Boxqf0cs+vnZI49yVmwY='),
-(1,'urn:mpeg:dash:mp4protection:2011',NULL),
-(1,'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95','AAACJnBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAgYGAgAAAQABAPwBPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9'),
-(1,'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed','AAAAOHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABgSEAPJu/7tFE1Boxqf0cs+vnZI49yVmwY=');
-
 INSERT INTO role (adaptation_set_position, value) VALUES
 (0, 'main');

@@ -24,22 +24,6 @@ INSERT INTO representation (id, period_id, adaptation_set_id, codecs, bandwidth,
 ('dd5ce011-7c09-4ecb-b023-75e3a7048d1c/142c7c1d-ed31-449e-8491-6b624b135ad1',NULL,NULL,NULL,415,'image/jpeg',720,324,NULL),
 ('dd5ce011-7c09-4ecb-b023-75e3a7048d1c/c2ea61a0-cfdc-4070-94f5-6c7edea9fd63',NULL,NULL,NULL,1460,'image/jpeg',1600,720,NULL);
 
--- pssh values truncated to 99 bytes (non-URL rule).
--- Rows 1-6: sets 1 & 2 share KID da31b8cb-f5a6-4226-bb7b-18568d54df49
--- (no column for KIDs). Row 7-9: Spanish set, KID 9af58f7d-5907-4221-acf0-526ffb3fe366.
--- PlayReady mspr:pro payloads stored in pssh column (only payload column
--- available). mp4protection entries carry no pssh payload in source -> NULL.
-INSERT INTO content_protection (adaptation_set_id, scheme_id_uri, pssh) VALUES
-(NULL,'urn:mpeg:dash:mp4protection:2011',NULL),
-(NULL,'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95','wgMAAAEAAQC4AzwAVwBSAE0ASABFAEEARABFAFIAIAB4AG0AbABuAHMAPQAiAGgAdAB0AHAAOgAvAC8AcwBjAGgAZQBtAGEAcwA'),
-(NULL,'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed','AAAAV3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAADcIARIQ2jG4y/WmQia7exhWjVTfSRoLYnV5ZHJta2V5b3MiEB9RCCuJ6UF'),
-(NULL,'urn:mpeg:dash:mp4protection:2011',NULL),
-(NULL,'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95','wgMAAAEAAQC4AzwAVwBSAE0ASABFAEEARABFAFIAIAB4AG0AbABuAHMAPQAiAGgAdAB0AHAAOgAvAC8AcwBjAGgAZQBtAGEAcwA'),
-(NULL,'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed','AAAAV3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAADcIARIQ2jG4y/WmQia7exhWjVTfSRoLYnV5ZHJta2V5b3MiEB9RCCuJ6UF'),
-(NULL,'urn:mpeg:dash:mp4protection:2011',NULL),
-(NULL,'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95','pAMAAAEAAQCaAzwAVwBSAE0ASABFAEEARABFAFIAIAB4AG0AbABuAHMAPQAiAGgAdAB0AHAAOgAvAC8AcwBjAGgAZQBtAGEAcwA'),
-(NULL,'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed','AAAAWXBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAADkIARIQmvWPfVkHQiGs8FJv+z/jZhoLYnV5ZHJta2V5b3MiEJr1j31ZB0I');
-
 INSERT INTO role (adaptation_set_id, value) VALUES
 (NULL,'main'),
 (NULL,'main');
